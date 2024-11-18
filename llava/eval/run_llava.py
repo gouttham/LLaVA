@@ -1,5 +1,7 @@
 import argparse
 import torch
+import os,sys
+sys.path.append("../../llava")
 
 from llava.constants import (
     IMAGE_TOKEN_INDEX,

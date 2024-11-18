@@ -110,7 +110,7 @@ def save_dataset(dataset_name, output_folder, class_name, subset_name, val_sampl
 
 
 # Usage example
-output_folder = '/localscratch/gna23/LLaVA/dataset'
+output_folder = 'dataset'
 class_name = 'other'
 val_samples = 300
 save_dataset('Multimodal-Fatima/OK-VQA_train', output_folder, class_name, 'train', val_samples)
