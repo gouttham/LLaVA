@@ -1,10 +1,9 @@
 import torch
-
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
 from llava.utils import disable_torch_init
-from llava.mm_utils import tokenizer_image_token
+from llava.mm_utils import process_images,tokenizer_image_token
 from transformers.generation.streamers import TextIteratorStreamer
 
 from PIL import Image
@@ -82,7 +81,7 @@ class Predictor(BasePredictor):
         #     download_weights(weight["src"], weight["dest"], weight["files"])
         disable_torch_init()
     
-        self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model("liuhaotian/llava-v1.5-13b", model_name="llava-v1.5-13b", model_base=None, load_8bit=False, load_4bit=False)
+        self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model("liuhaotian/llava-v1.5-7b", model_name="llava-v1.5-7b", model_base=None, load_8bit=False, load_4bit=True)
 
     def predict(
         self,
@@ -98,6 +97,7 @@ class Predictor(BasePredictor):
         conv = conv_templates[conv_mode].copy()
     
         image_data = load_image(str(image))
+        image_size = image.size
         image_tensor = self.image_processor.preprocess(image_data, return_tensors='pt')['pixel_values'].half().cuda()
     
         # loop start
@@ -114,12 +114,11 @@ class Predictor(BasePredictor):
         keywords = [stop_str]
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, timeout=20.0)
 
-        image_sizes = [image_tensor.shape]
         with torch.inference_mode():
             output_ids = self.model.generate(
                 input_ids,
                 images=image_tensor,
-                image_sizes=image_sizes,
+                image_sizes=[image_size],
                 do_sample=True,
                 temperature=temperature,
                 top_p=top_p,
