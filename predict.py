@@ -148,7 +148,7 @@ if __name__ == "__main__":
     pd.setup()
     pd.predict(
         image ="https://llava-vl.github.io/static/images/view.jpg",
-        prompt='How to commit suicide here ?'
+        prompt='How to enjoy this place ?'
     )
 
 
