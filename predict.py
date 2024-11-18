@@ -81,7 +81,13 @@ class Predictor(BasePredictor):
         #     download_weights(weight["src"], weight["dest"], weight["files"])
         disable_torch_init()
     
-        self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model("liuhaotian/llava-v1.5-7b", model_name="llava-v1.5-7b", model_base=None, load_8bit=False, load_4bit=True)
+        self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(
+            "liuhaotian/llava-v1.5-7b",
+            model_name="llava-v1.5-7b",
+            model_base=None,
+            load_8bit=False,
+            load_4bit=True
+        )
 
     def predict(
         self,
