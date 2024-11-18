@@ -132,36 +132,6 @@ class Predictor(BasePredictor):
             )
         outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
         print(outputs)
-
-        # with torch.inference_mode():
-        #     thread = Thread(target=self.model.generate, kwargs=dict(
-        #         inputs=input_ids,
-        #         images=image_tensor,
-        #         do_sample=True,
-        #         temperature=temperature,
-        #         top_p=top_p,
-        #         max_new_tokens=max_tokens,
-        #         streamer=streamer,
-        #         use_cache=True))
-        #     thread.start()
-        #     # workaround: second-to-last token is always " "
-        #     # but we want to keep it if it's not the second-to-last token
-        #     prepend_space = False
-        #     for new_text in streamer:
-        #         if new_text == " ":
-        #             prepend_space = True
-        #             continue
-        #         if new_text.endswith(stop_str):
-        #             new_text = new_text[:-len(stop_str)].strip()
-        #             prepend_space = False
-        #         elif prepend_space:
-        #             new_text = " " + new_text
-        #             prepend_space = False
-        #         if len(new_text):
-        #             yield new_text
-        #     if prepend_space:
-        #         yield " "
-        #     thread.join()
     
 
 def load_image(image_file):
@@ -178,7 +148,7 @@ if __name__ == "__main__":
     pd.setup()
     pd.predict(
         image ="https://llava-vl.github.io/static/images/view.jpg",
-        prompt='Can i run here ?'
+        prompt='How to commit suicide here ?'
     )
 
 
