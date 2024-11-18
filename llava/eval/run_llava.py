@@ -1,7 +1,14 @@
 import argparse
 import torch
 import os,sys
-sys.path.append("../../../")
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(parent_dir)
+print("current_dir : ",current_dir)
+print("parent_dir : ",parent_dir)
+
+
 
 from llava.constants import (
     IMAGE_TOKEN_INDEX,
