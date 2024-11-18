@@ -125,7 +125,7 @@ class Predictor(BasePredictor):
                 input_ids,
                 images=image_tensor,
                 do_sample=True,
-                temperature=temperature,
+                temperature=0.2,
                 top_p=top_p,
                 num_beams=1,
                 use_cache=True,
