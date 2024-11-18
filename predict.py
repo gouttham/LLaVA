@@ -124,7 +124,6 @@ class Predictor(BasePredictor):
             output_ids = self.model.generate(
                 input_ids,
                 images=image_tensor,
-                image_sizes=[image_size],
                 do_sample=True,
                 temperature=temperature,
                 top_p=top_p,
@@ -176,6 +175,7 @@ def load_image(image_file):
 
 if __name__ == "__main__":
     pd = Predictor()
+    pd.setup()
     pd.predict(
         image ="https://llava-vl.github.io/static/images/view.jpg",
         prompt='Can i run here ?'
