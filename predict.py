@@ -103,7 +103,7 @@ class Predictor(BasePredictor):
         conv = conv_templates[conv_mode].copy()
     
         image_data = load_image(str(image))
-        image_size = image.size
+        # image_size = image.size
         image_tensor = self.image_processor.preprocess(image_data, return_tensors='pt')['pixel_values'].half().cuda()
     
         # loop start
