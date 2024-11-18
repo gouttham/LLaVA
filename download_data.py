@@ -85,7 +85,7 @@ def process_and_save(dataset, output_folder, subset_name):
 
 def save_dataset(dataset_name, output_folder, class_name, subset_name, val_samples=None):
     # Load the dataset from Hugging Face
-    dataset = load_dataset(dataset_name, split=subset_name,cache_dir = "/localscratch/gna23/LLaVA/datasets")
+    dataset = load_dataset(dataset_name, split=subset_name)
 
 
     # Filter for images with the specified class in 'question_type'
@@ -110,7 +110,7 @@ def save_dataset(dataset_name, output_folder, class_name, subset_name, val_sampl
 
 
 # Usage example
-output_folder = 'dataset'
+output_folder = '/localscratch/gna23/LLaVA/dataset'
 class_name = 'other'
 val_samples = 300
 save_dataset('Multimodal-Fatima/OK-VQA_train', output_folder, class_name, 'train', val_samples)
