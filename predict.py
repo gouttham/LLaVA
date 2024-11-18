@@ -153,3 +153,13 @@ def load_image(image_file):
         image = Image.open(image_file).convert('RGB')
     return image
 
+
+if __name__ == "__main__":
+    pd = Predictor()
+    pd.predict(
+        image ="https://llava-vl.github.io/static/images/view.jpg",
+        prompt='Can i run here ?'
+    )
+
+
+
