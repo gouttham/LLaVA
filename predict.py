@@ -78,8 +78,8 @@ def download_weights(baseurl: str, basedest: str, files: list[str]):
 class Predictor(BasePredictor):
     def setup(self) -> None:
         """Load the model into memory to make running multiple predictions efficient"""
-        for weight in weights:
-            download_weights(weight["src"], weight["dest"], weight["files"])
+        # for weight in weights:
+        #     download_weights(weight["src"], weight["dest"], weight["files"])
         disable_torch_init()
     
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model("liuhaotian/llava-v1.5-13b", model_name="llava-v1.5-13b", model_base=None, load_8bit=False, load_4bit=False)
