@@ -9,7 +9,7 @@ deepspeed ./llava/train/train_mem.py \
     --version llava_llama_2 \
     --data_path ./dataset/train/dataset.json \
     --validation_data_path ./dataset/validation/dataset.json \
-    --image_folder /root/dataset/images/ \
+    --image_folder ./dataset/images/ \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --mm_projector_type mlp2x_gelu \
     --mm_vision_select_layer -2 \
