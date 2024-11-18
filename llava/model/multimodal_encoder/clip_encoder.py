@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from transformers import CLIPVisionModel, CLIPImageProcessor, CLIPVisionConfig
 
-
+base_path = "/localscratch/gna23/LLaVA/downloads/"
 class CLIPVisionTower(nn.Module):
     def __init__(self, vision_tower, args, delay_load=False):
         super().__init__()
@@ -19,7 +19,6 @@ class CLIPVisionTower(nn.Module):
         elif getattr(args, 'unfreeze_mm_vision_tower', False):
             self.load_model()
         else:
-            base_path = "/localscratch/gna23/LLaVA/downloads/"
             self.cfg_only = CLIPVisionConfig.from_pretrained(self.vision_tower_name,cache_dir=base_path)
 
     def load_model(self, device_map=None):
@@ -27,8 +26,8 @@ class CLIPVisionTower(nn.Module):
             print('{} is already loaded, `load_model` called again, skipping.'.format(self.vision_tower_name))
             return
 
-        self.image_processor = CLIPImageProcessor.from_pretrained(self.vision_tower_name)
-        self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map)
+        self.image_processor = CLIPImageProcessor.from_pretrained(self.vision_tower_name,cache_dir=base_path)
+        self.vision_tower = CLIPVisionModel.from_pretrained(self.vision_tower_name, device_map=device_map,cache_dir=base_path)
         self.vision_tower.requires_grad_(False)
 
         self.is_loaded = True
