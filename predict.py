@@ -113,36 +113,51 @@ class Predictor(BasePredictor):
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
         keywords = [stop_str]
         streamer = TextIteratorStreamer(self.tokenizer, skip_prompt=True, timeout=20.0)
-    
+
+        image_sizes = [image_tensor.shape]
         with torch.inference_mode():
-            thread = Thread(target=self.model.generate, kwargs=dict(
-                inputs=input_ids,
+            output_ids = self.model.generate(
+                input_ids,
                 images=image_tensor,
+                image_sizes=image_sizes,
                 do_sample=True,
                 temperature=temperature,
                 top_p=top_p,
-                max_new_tokens=max_tokens,
-                streamer=streamer,
-                use_cache=True))
-            thread.start()
-            # workaround: second-to-last token is always " "
-            # but we want to keep it if it's not the second-to-last token
-            prepend_space = False
-            for new_text in streamer:
-                if new_text == " ":
-                    prepend_space = True
-                    continue
-                if new_text.endswith(stop_str):
-                    new_text = new_text[:-len(stop_str)].strip()
-                    prepend_space = False
-                elif prepend_space:
-                    new_text = " " + new_text
-                    prepend_space = False
-                if len(new_text):
-                    yield new_text
-            if prepend_space:
-                yield " "
-            thread.join()
+                num_beams=1,
+                use_cache=True,
+            )
+        outputs = self.tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        print(outputs)
+
+        # with torch.inference_mode():
+        #     thread = Thread(target=self.model.generate, kwargs=dict(
+        #         inputs=input_ids,
+        #         images=image_tensor,
+        #         do_sample=True,
+        #         temperature=temperature,
+        #         top_p=top_p,
+        #         max_new_tokens=max_tokens,
+        #         streamer=streamer,
+        #         use_cache=True))
+        #     thread.start()
+        #     # workaround: second-to-last token is always " "
+        #     # but we want to keep it if it's not the second-to-last token
+        #     prepend_space = False
+        #     for new_text in streamer:
+        #         if new_text == " ":
+        #             prepend_space = True
+        #             continue
+        #         if new_text.endswith(stop_str):
+        #             new_text = new_text[:-len(stop_str)].strip()
+        #             prepend_space = False
+        #         elif prepend_space:
+        #             new_text = " " + new_text
+        #             prepend_space = False
+        #         if len(new_text):
+        #             yield new_text
+        #     if prepend_space:
+        #         yield " "
+        #     thread.join()
     
 
 def load_image(image_file):
