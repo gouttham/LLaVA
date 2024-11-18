@@ -1,14 +1,14 @@
-deepspeed /root/LLaVA/llava/train/train_mem.py \
-    --deepspeed /root/LLaVA/scripts/zero2.json \
+deepspeed ./llava/train/train_mem.py \
+    --deepspeed ./scripts/zero2.json \
     --lora_enable True \
     --lora_r 128 \
     --lora_alpha 256 \
     --mm_projector_lr 2e-5 \
     --bits 4 \
-    --model_name_or_path /root/LLaVA/llava/llava-v1.5-7b \
+    --model_name_or_path liuhaotian/llava-v1.5-7b \
     --version llava_llama_2 \
-    --data_path /root/dataset/train/dataset.json \
-    --validation_data_path /root/dataset/validation/dataset.json \
+    --data_path ./dataset/train/dataset.json \
+    --validation_data_path ./dataset/validation/dataset.json \
     --image_folder /root/dataset/images/ \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --mm_projector_type mlp2x_gelu \
@@ -18,12 +18,12 @@ deepspeed /root/LLaVA/llava/train/train_mem.py \
     --image_aspect_ratio pad \
     --group_by_modality_length True \
     --bf16 True \
-    --output_dir /root/LLaVA/llava/checkpoints/llama-2-7b-chat-task-qlora \
+    --output_dir ./llava/checkpoints/llama-2-7b-chat-task-qlora \
     --num_train_epochs 500 \
     --per_device_train_batch_size 32 \
     --per_device_eval_batch_size 32 \
     --gradient_accumulation_steps 1 \
-    --evaluation_strategy “epoch” \
+    --evaluation_strategy "epoch" \
     --save_strategy "steps" \
     --save_steps 50000 \
     --save_total_limit 1 \
