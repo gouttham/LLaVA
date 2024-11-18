@@ -15,8 +15,7 @@ from io import BytesIO
 from transformers import TextStreamer
 
 import os
-base_path = "/localscratch/gna23/LLaVA/downloads/"
-os.makedirs(base_path, exist_ok=True)
+
 
 def load_image(image_file):
     if image_file.startswith('http://') or image_file.startswith('https://'):

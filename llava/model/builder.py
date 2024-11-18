@@ -22,6 +22,8 @@ import torch
 from llava.model import *
 from llava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 
+base_path = "/localscratch/gna23/LLaVA/downloads/"
+os.makedirs(base_path, exist_ok=True)
 
 def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda", use_flash_attn=False, **kwargs):
     kwargs = {"device_map": device_map, **kwargs}
@@ -135,11 +137,11 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         else:
             use_fast = False
             if 'mpt' in model_name.lower():
-                tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
-                model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, trust_remote_code=True, **kwargs)
+                tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, cache_dir=base_path)
+                model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, trust_remote_code=True,cache_dir=base_path, **kwargs)
             else:
-                tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
-                model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True, **kwargs)
+                tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False,cache_dir=base_path)
+                model = AutoModelForCausalLM.from_pretrained(model_path, low_cpu_mem_usage=True,cache_dir=base_path, **kwargs)
 
     image_processor = None
 
