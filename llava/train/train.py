@@ -989,13 +989,6 @@ def train(attn_implementation=None):
         )
         if training_args.local_rank == 0 or training_args.local_rank == -1:
             model.config.save_pretrained(training_args.output_dir)
-
-            print("***************************************************************")
-            print(f"HF_HOME: {os.getenv('HF_HOME')}")
-            print(f"TRANSFORMERS_CACHE: {os.getenv('TRANSFORMERS_CACHE')}")
-            print(type(model))
-            print("***************************************************************")
-
             model.save_pretrained(training_args.output_dir, state_dict=state_dict, cache_dir = "/localscratch/gna23/LLaVA/downloads/")
             torch.save(non_lora_state_dict, os.path.join(training_args.output_dir, 'non_lora_trainables.bin'))
     else:
