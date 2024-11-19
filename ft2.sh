@@ -12,7 +12,7 @@ deepspeed llava/train/train_mem.py \
     --image_aspect_ratio pad \
     --group_by_modality_length True \
     --bf16 True \
-    --output_dir /localscratch/gna23/LLaVA/llava/downloads/checkpoints/llava_lora_weights3 \
+    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_weights3 \
     --num_train_epochs 1 \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
