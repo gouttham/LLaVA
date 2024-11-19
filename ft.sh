@@ -1,5 +1,5 @@
 deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
-    --deepspeed ./scripts/zero2.json \
+    --deepspeed ./scripts/zero3.json \
     --lora_enable True \
     --lora_r 128 \
     --lora_alpha 256 \
@@ -19,7 +19,7 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --bf16 True \
     --output_dir /localscratch/gna23/LLaVA/llava/downloads/checkpoints/llava_lora_weights3 \
     --num_train_epochs 1 \
-    --per_devicetrain_batch_size 32 \
+    --per_device_train_batch_size 32 \
     --per_device_eval_batch_size 32 \
     --gradient_accumulation_steps 1 \
     --evaluation_strategy "no" \
@@ -37,4 +37,6 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --dataloader_num_workers 4 \
     --lazy_preprocess True \
     --report_to wandb \
-    --cache_dir /localscratch/gna23/LLaVA/downloads/
+    --cache_dir /localscratch/gna23/LLaVA/downloads/ \
+    --tune_mm_mlp_adapter True \
+    --low_cpu_mem_usage False
