@@ -8,6 +8,7 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --model_name_or_path liuhaotian/llava-v1.5-7b \
     --version llava_llama_2 \
     --data_path /localscratch/gna23/LLaVA/dataset/train/dataset.json \
+    --eval_dataset /localscratch/gna23/LLaVA/dataset/validation/dataset.json \
     --image_folder /localscratch/gna23/LLaVA/dataset/images/ \
     --vision_tower openai/clip-vit-large-patch14-336 \
     --mm_projector_type mlp2x_gelu \
