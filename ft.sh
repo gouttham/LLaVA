@@ -18,7 +18,7 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --group_by_modality_length True \
     --bf16 True \
     --output_dir /localscratch/gna23/LLaVA/llava/checkpoints/llama-2-7b-chat-task-qlora \
-    --num_train_epochs 500 \
+    --num_train_epochs 1 \
     --per_device_train_batch_size 32 \
     --per_device_eval_batch_size 32 \
     --gradient_accumulation_steps 1 \
