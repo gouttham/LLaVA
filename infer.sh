@@ -1,1 +1,1 @@
-python ./llava/eval/run_llava.py --model-path "liuhaotian/llava-v1.5-7b" --image-file "/localscratch/gna23/LLaVA/dataset/images/0f47c0b5-2c77-45e6-87b0-89af46e99500.jpg" --query "why was this photo taken?"
+python ./llava/eval/run_llava.py --model-path "checkpoints/llama-2-7b-chat-task-qlora" --model-base "liuhaotian/llava-v1.5-7b" --image-file "/localscratch/gna23/LLaVA/dataset/images/0f47c0b5-2c77-45e6-87b0-89af46e99500.jpg" --query "why was this photo taken?"
