@@ -4,7 +4,6 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --lora_r 128 \
     --lora_alpha 256 \
     --mm_projector_lr 2e-5 \
-    --bits 4 \
     --model_name_or_path liuhaotian/llava-v1.5-7b \
     --version llava_llama_2 \
     --data_path /localscratch/gna23/LLaVA/dataset/train/dataset.json \
@@ -17,7 +16,7 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --image_aspect_ratio pad \
     --group_by_modality_length True \
     --bf16 True \
-    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_weights6 \
+    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_weights7 \
     --num_train_epochs 1 \
     --per_device_train_batch_size 32 \
     --per_device_eval_batch_size 32 \
