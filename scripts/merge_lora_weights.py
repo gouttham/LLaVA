@@ -1,4 +1,14 @@
 import argparse
+import os,sys
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
+sys.path.append(parent_dir)
+print("current_dir : ",current_dir)
+print("parent_dir : ",parent_dir)
+parent_dir = os.path.abspath(os.path.join(current_dir, '../..'))
+sys.path.append(parent_dir)
+print("parent_dir : ",parent_dir)
+
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path
 
