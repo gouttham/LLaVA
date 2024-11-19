@@ -983,7 +983,7 @@ def train(attn_implementation=None):
         )
         if training_args.local_rank == 0 or training_args.local_rank == -1:
             model.config.save_pretrained(training_args.output_dir)
-            model.save_pretrained(training_args.output_dir, state_dict=state_dict)
+            model.save_pretrained(training_args.output_dir, state_dict=state_dict, cache_dir = "/localscratch/gna23/LLaVA/downloads/")
             torch.save(non_lora_state_dict, os.path.join(training_args.output_dir, 'non_lora_trainables.bin'))
     else:
         safe_save_model_for_hf_trainer(trainer=trainer,
