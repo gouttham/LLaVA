@@ -1,5 +1,5 @@
 deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
-    --deepspeed ./scripts/zero3.json \
+    --deepspeed ./scripts/zero2.json \
     --lora_enable True \
     --lora_r 128 \
     --lora_alpha 256 \
@@ -37,5 +37,4 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --dataloader_num_workers 4 \
     --lazy_preprocess True \
     --report_to wandb \
-    --cache_dir /localscratch/gna23/LLaVA/downloads/ \
-    --tune_mm_mlp_adapter True
+    --cache_dir /localscratch/gna23/LLaVA/downloads/
