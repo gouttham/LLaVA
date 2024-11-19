@@ -37,5 +37,4 @@ deepspeed llava/train/train_mem.py \
     --dataloader_num_workers 4 \
     --lazy_preprocess True \
     --report_to wandb \
-    --cache_dir /localscratch/gna23/LLaVA/downloads/ \
-    --tune_mm_mlp_adapter True
+    --cache_dir /localscratch/gna23/LLaVA/downloads/
