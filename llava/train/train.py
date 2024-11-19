@@ -37,6 +37,8 @@ from llava.mm_utils import tokenizer_image_token
 
 from PIL import Image
 import os
+
+os.environ["HF_HOME"] = "/localscratch/gna23/LLaVA/downloads/hf_home"
 os.environ["TRANSFORMERS_CACHE"] = "/localscratch/gna23/LLaVA/downloads/"
 
 local_rank = None
