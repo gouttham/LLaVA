@@ -41,6 +41,12 @@ import os
 os.environ["HF_HOME"] = "/localscratch/gna23/LLaVA/downloads/hf_home"
 os.environ["TRANSFORMERS_CACHE"] = "/localscratch/gna23/LLaVA/downloads/"
 
+print("***************************************************************")
+print(f"HF_HOME: {os.getenv('HF_HOME')}")
+print(f"TRANSFORMERS_CACHE: {os.getenv('TRANSFORMERS_CACHE')}")
+print("***************************************************************")
+
+
 local_rank = None
 
 
