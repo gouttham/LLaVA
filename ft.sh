@@ -17,7 +17,7 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --image_aspect_ratio pad \
     --group_by_modality_length True \
     --bf16 True \
-    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_fn_weights5 \
+    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_fn_weights6 \
     --num_train_epochs 1 \
     --per_device_train_batch_size 32 \
     --per_device_eval_batch_size 32 \
@@ -38,3 +38,4 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --lazy_preprocess True \
     --report_to wandb \
     --cache_dir /localscratch/gna23/LLaVA/downloads/
+    --tune_mm_mlp_adapter True
