@@ -38,5 +38,4 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --lazy_preprocess True \
     --report_to wandb \
     --cache_dir /localscratch/gna23/LLaVA/downloads/ \
-    --tune_mm_mlp_adapter True \
-    --low_cpu_mem_usage False
+    --tune_mm_mlp_adapter True
