@@ -13,7 +13,7 @@ deepspeed llava/train/train_mem.py \
     --group_by_modality_length True \
     --bf16 True \
     --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_fn_weights4 \
-    --num_train_epochs 1 \
+    --num_train_epochs 100 \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 1 \
