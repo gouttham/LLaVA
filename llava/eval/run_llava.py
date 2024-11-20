@@ -186,8 +186,11 @@ def eval_model(args):
     val_json = json.load(open("/localscratch/gna23/LLaVA/v1/cd_train/dataset.json"))
 
     acc = []
+    ctr = 0
     for val in val_json:
         cur_out = []
+        print(ctr,end='\r')
+        ctr+=1
         for _ in range(10):
             print(val["image"])
             im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
