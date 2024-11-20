@@ -12,4 +12,4 @@ python ./llava/eval/run_llava.py \
     --model-path "/localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_weights7" \
     --model-base "liuhaotian/llava-v1.5-7b" \
     --image-file "/localscratch/gna23/LLaVA/dataset/images/be76e1f3-4d58-499c-b7ff-1a0aa24f8260.jpg" \
-    --query "why was this photo taken?"
+    --query "How many laptop?"
