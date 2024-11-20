@@ -187,7 +187,7 @@ def eval_model(args):
 
     acc = []
     ctr = 0
-    for val in val_json:
+    for val in val_json[:10]:
         cur_out = []
         print(ctr,end='\r')
         ctr+=1
@@ -251,11 +251,14 @@ def eval_model(args):
             outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
             print("\nResponse: ", outputs)
             cur_out.append(outputs)
-        pd = get_max_repeated_string(outputs)
+        print(cur_out)
+        pd = get_max_repeated_string(cur_out)
+        print(pd,gt)
         if pd==gt:
             acc.append(1)
         else:
             acc.append(0)
+        print(acc)
     print("acc : ",sum(acc)/len(acc))
 
 
