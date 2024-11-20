@@ -1,5 +1,3 @@
-rm -rf ./downloads/checkpoints/
-
 deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
     --deepspeed ./scripts/zero2.json \
     --lora_enable True \

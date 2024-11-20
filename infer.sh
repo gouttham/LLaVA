@@ -9,7 +9,7 @@
 #    --query "why was this photo taken?"\
 
 python ./llava/eval/run_llava.py \
-    --model-path "/localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_weights7" \
+    --model-path "/localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls1" \
     --model-base "liuhaotian/llava-v1.5-7b" \
-    --image-file "/localscratch/gna23/LLaVA/dataset/images/be76e1f3-4d58-499c-b7ff-1a0aa24f8260.jpg" \
-    --query "What is this desk used for?"
+    --image-file "/localscratch/gna23/LLaVA/v1/cd_images/7fada345-8e1e-4956-a1bb-79735da8928f.jpg" \
+    --query "Are given two images are similar ?"
