@@ -59,29 +59,101 @@ def load_images(image_files):
     return out
 
 
+# def eval_model(args):
+#     # Model
+#     disable_torch_init()
+#
+#     model_name = get_model_name_from_path(args.model_path)
+#     print("model_name : ",model_name)
+#     tokenizer, model, image_processor, context_len = load_pretrained_model(
+#         args.model_path, args.model_base, model_name
+#     )
+#
+#     qs = args.query
+#     image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
+#     if IMAGE_PLACEHOLDER in qs:
+#         if model.config.mm_use_im_start_end:
+#             qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
+#         else:
+#             qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
+#     else:
+#         if model.config.mm_use_im_start_end:
+#             qs = image_token_se + "\n" + qs
+#         else:
+#             qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
+#
+#     if "llama-2" in model_name.lower():
+#         conv_mode = "llava_llama_2"
+#     elif "mistral" in model_name.lower():
+#         conv_mode = "mistral_instruct"
+#     elif "v1.6-34b" in model_name.lower():
+#         conv_mode = "chatml_direct"
+#     elif "v1" in model_name.lower():
+#         conv_mode = "llava_v1"
+#     elif "mpt" in model_name.lower():
+#         conv_mode = "mpt"
+#     else:
+#         conv_mode = "llava_v0"
+#
+#     if args.conv_mode is not None and conv_mode != args.conv_mode:
+#         print(
+#             "[WARNING] the auto inferred conversation mode is {}, while `--conv-mode` is {}, using {}".format(
+#                 conv_mode, args.conv_mode, args.conv_mode
+#             )
+#         )
+#     else:
+#         args.conv_mode = conv_mode
+#
+#     conv = conv_templates[args.conv_mode].copy()
+#     conv.append_message(conv.roles[0], qs)
+#     conv.append_message(conv.roles[1], None)
+#     prompt = conv.get_prompt()
+#
+#     image_files = image_parser(args)
+#     images = load_images(image_files)
+#     image_sizes = [x.size for x in images]
+#     images_tensor = process_images(
+#         images,
+#         image_processor,
+#         model.config
+#     ).to(model.device, dtype=torch.float16)
+#
+#     input_ids = (
+#         tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
+#         .unsqueeze(0)
+#         .cuda()
+#     )
+#
+#     with torch.inference_mode():
+#         output_ids = model.generate(
+#             input_ids,
+#             images=images_tensor,
+#             image_sizes=image_sizes,
+#             do_sample=True if args.temperature > 0 else False,
+#             temperature=args.temperature,
+#             top_p=args.top_p,
+#             num_beams=args.num_beams,
+#             max_new_tokens=args.max_new_tokens,
+#             use_cache=True,
+#         )
+#
+#     outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+#     print(outputs)
+
+import torch
+import re
+
 def eval_model(args):
-    # Model
+    # Model Initialization
     disable_torch_init()
 
     model_name = get_model_name_from_path(args.model_path)
-    print("model_name : ",model_name)
+    print("Model Name: ", model_name)
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         args.model_path, args.model_base, model_name
     )
 
-    qs = args.query
-    image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
-    if IMAGE_PLACEHOLDER in qs:
-        if model.config.mm_use_im_start_end:
-            qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
-        else:
-            qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
-    else:
-        if model.config.mm_use_im_start_end:
-            qs = image_token_se + "\n" + qs
-        else:
-            qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
-
+    # Determine Conversation Mode
     if "llama-2" in model_name.lower():
         conv_mode = "llava_llama_2"
     elif "mistral" in model_name.lower():
@@ -97,48 +169,74 @@ def eval_model(args):
 
     if args.conv_mode is not None and conv_mode != args.conv_mode:
         print(
-            "[WARNING] the auto inferred conversation mode is {}, while `--conv-mode` is {}, using {}".format(
+            "[WARNING] The auto-inferred conversation mode is {}, while `--conv-mode` is {}, using {}".format(
                 conv_mode, args.conv_mode, args.conv_mode
             )
         )
     else:
         args.conv_mode = conv_mode
 
-    conv = conv_templates[args.conv_mode].copy()
-    conv.append_message(conv.roles[0], qs)
-    conv.append_message(conv.roles[1], None)
-    prompt = conv.get_prompt()
+    while True:
+        # Get user input for query and image file
+        user_query = input("Enter your query (or type 'quit' to exit): ").strip()
+        if user_query.lower() == 'quit':
+            print("Exiting...")
+            break
 
-    image_files = image_parser(args)
-    images = load_images(image_files)
-    image_sizes = [x.size for x in images]
-    images_tensor = process_images(
-        images,
-        image_processor,
-        model.config
-    ).to(model.device, dtype=torch.float16)
+        user_image_file = input("Enter the path to the image file: ").strip()
 
-    input_ids = (
-        tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
-        .unsqueeze(0)
-        .cuda()
-    )
+        # Prepare Query
+        qs = user_query
+        image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
+        if IMAGE_PLACEHOLDER in qs:
+            if model.config.mm_use_im_start_end:
+                qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
+            else:
+                qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
+        else:
+            if model.config.mm_use_im_start_end:
+                qs = image_token_se + "\n" + qs
+            else:
+                qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
 
-    with torch.inference_mode():
-        output_ids = model.generate(
-            input_ids,
-            images=images_tensor,
-            image_sizes=image_sizes,
-            do_sample=True if args.temperature > 0 else False,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            num_beams=args.num_beams,
-            max_new_tokens=args.max_new_tokens,
-            use_cache=True,
+        # Conversation Template
+        conv = conv_templates[args.conv_mode].copy()
+        conv.append_message(conv.roles[0], qs)
+        conv.append_message(conv.roles[1], None)
+        prompt = conv.get_prompt()
+
+        # Load and Process Image
+        image_files = [user_image_file]  # Wrap in list for compatibility
+        images = load_images(image_files)
+        image_sizes = [x.size for x in images]
+        images_tensor = process_images(
+            images,
+            image_processor,
+            model.config
+        ).to(model.device, dtype=torch.float16)
+
+        # Tokenize and Generate Output
+        input_ids = (
+            tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
+            .unsqueeze(0)
+            .cuda()
         )
 
-    outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-    print(outputs)
+        with torch.inference_mode():
+            output_ids = model.generate(
+                input_ids,
+                images=images_tensor,
+                image_sizes=image_sizes,
+                do_sample=True if args.temperature > 0 else False,
+                temperature=args.temperature,
+                top_p=args.top_p,
+                num_beams=args.num_beams,
+                max_new_tokens=args.max_new_tokens,
+                use_cache=True,
+            )
+
+        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+        print("\nResponse: ", outputs)
 
 
 if __name__ == "__main__":
