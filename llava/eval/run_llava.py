@@ -144,6 +144,12 @@ def load_images(image_files):
 import torch
 import re
 
+
+def get_max_repeated_string(string_list):
+    if not string_list:
+        return None
+    return max(set(string_list), key=string_list.count)
+
 def eval_model(args):
     # Model Initialization
     disable_torch_init()
@@ -179,66 +185,75 @@ def eval_model(args):
 
     val_json = json.load(open("/localscratch/gna23/LLaVA/v1/cd_train/dataset.json"))
 
-
+    acc = []
     for val in val_json:
-        print(val["image"])
-        im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
-        for ech in val["conversations"]:
-            if ech["from"] == "human":
-                qs = ech["value"]
-            elif ech["from"] == "gpt":
-                a = ech["value"]
+        cur_out = []
+        for _ in range(10):
+            print(val["image"])
+            im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
+            for ech in val["conversations"]:
+                if ech["from"] == "human":
+                    qs = ech["value"]
+                elif ech["from"] == "gpt":
+                    gt = ech["value"]
 
-        image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
-        if IMAGE_PLACEHOLDER in qs:
-            if model.config.mm_use_im_start_end:
-                qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
+            image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
+            if IMAGE_PLACEHOLDER in qs:
+                if model.config.mm_use_im_start_end:
+                    qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
+                else:
+                    qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
             else:
-                qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
-        else:
-            if model.config.mm_use_im_start_end:
-                qs = image_token_se + "\n" + qs
-            else:
-                qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
+                if model.config.mm_use_im_start_end:
+                    qs = image_token_se + "\n" + qs
+                else:
+                    qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
 
-        # Conversation Template
-        conv = conv_templates[args.conv_mode].copy()
-        conv.append_message(conv.roles[0], qs)
-        conv.append_message(conv.roles[1], None)
-        prompt = conv.get_prompt()
+            # Conversation Template
+            conv = conv_templates[args.conv_mode].copy()
+            conv.append_message(conv.roles[0], qs)
+            conv.append_message(conv.roles[1], None)
+            prompt = conv.get_prompt()
 
-        # Load and Process Image
-        image_files = im_nam  # Wrap in list for compatibility
-        images = load_images(image_files)
-        image_sizes = [x.size for x in images]
-        images_tensor = process_images(
-            images,
-            image_processor,
-            model.config
-        ).to(model.device, dtype=torch.float16)
+            # Load and Process Image
+            image_files = im_nam  # Wrap in list for compatibility
+            images = load_images(image_files)
+            image_sizes = [x.size for x in images]
+            images_tensor = process_images(
+                images,
+                image_processor,
+                model.config
+            ).to(model.device, dtype=torch.float16)
 
-        # Tokenize and Generate Output
-        input_ids = (
-            tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
-            .unsqueeze(0)
-            .cuda()
-        )
-
-        with torch.inference_mode():
-            output_ids = model.generate(
-                input_ids,
-                images=images_tensor,
-                image_sizes=image_sizes,
-                do_sample=True if args.temperature > 0 else False,
-                temperature=args.temperature,
-                top_p=args.top_p,
-                num_beams=args.num_beams,
-                max_new_tokens=args.max_new_tokens,
-                use_cache=True,
+            # Tokenize and Generate Output
+            input_ids = (
+                tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
+                .unsqueeze(0)
+                .cuda()
             )
 
-        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        print("\nResponse: ", outputs)
+            with torch.inference_mode():
+                output_ids = model.generate(
+                    input_ids,
+                    images=images_tensor,
+                    image_sizes=image_sizes,
+                    do_sample=True if args.temperature > 0 else False,
+                    temperature=args.temperature,
+                    top_p=args.top_p,
+                    num_beams=args.num_beams,
+                    max_new_tokens=args.max_new_tokens,
+                    use_cache=True,
+                )
+
+            outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+            print("\nResponse: ", outputs)
+            cur_out.append(outputs)
+        pd = get_max_repeated_string(outputs)
+        if pd==gt:
+            acc.append(1)
+        else:
+            acc.append(0)
+    print("acc : ",sum(acc)/len(acc))
 
 
 
