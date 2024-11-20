@@ -1,6 +1,7 @@
 import argparse
 import torch
 import os,sys
+import json
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
@@ -176,17 +177,18 @@ def eval_model(args):
     else:
         args.conv_mode = conv_mode
 
-    while True:
-        # Get user input for query and image file
-        user_query = input("Enter your query (or type 'quit' to exit): ").strip()
-        if user_query.lower() == 'quit':
-            print("Exiting...")
-            break
+    val_json = json.load(open("/localscratch/gna23/LLaVA/v1/cd_train/dataset.json"))
 
-        user_image_file = input("Enter the path to the image file: ").strip()
 
-        # Prepare Query
-        qs = user_query
+    for val in val_json:
+        print(val["image"])
+        im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
+        for ech in val["conversations"]:
+            if ech["from"] == "human":
+                qs = ech["value"]
+            elif ech["from"] == "gpt":
+                a = ech["value"]
+
         image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
         if IMAGE_PLACEHOLDER in qs:
             if model.config.mm_use_im_start_end:
@@ -206,7 +208,7 @@ def eval_model(args):
         prompt = conv.get_prompt()
 
         # Load and Process Image
-        image_files = [user_image_file]  # Wrap in list for compatibility
+        image_files = im_nam  # Wrap in list for compatibility
         images = load_images(image_files)
         image_sizes = [x.size for x in images]
         images_tensor = process_images(
@@ -237,6 +239,70 @@ def eval_model(args):
 
         outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
         print("\nResponse: ", outputs)
+
+
+
+    # while True:
+    #     # Get user input for query and image file
+    #     user_query = input("Enter your query (or type 'quit' to exit): ").strip()
+    #     if user_query.lower() == 'quit':
+    #         print("Exiting...")
+    #         break
+    #
+    #     user_image_file = input("Enter the path to the image file: ").strip()
+    #
+    #     # Prepare Query
+    #     qs = user_query
+    #     image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
+    #     if IMAGE_PLACEHOLDER in qs:
+    #         if model.config.mm_use_im_start_end:
+    #             qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
+    #         else:
+    #             qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
+    #     else:
+    #         if model.config.mm_use_im_start_end:
+    #             qs = image_token_se + "\n" + qs
+    #         else:
+    #             qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
+    #
+    #     # Conversation Template
+    #     conv = conv_templates[args.conv_mode].copy()
+    #     conv.append_message(conv.roles[0], qs)
+    #     conv.append_message(conv.roles[1], None)
+    #     prompt = conv.get_prompt()
+    #
+    #     # Load and Process Image
+    #     image_files = [user_image_file]  # Wrap in list for compatibility
+    #     images = load_images(image_files)
+    #     image_sizes = [x.size for x in images]
+    #     images_tensor = process_images(
+    #         images,
+    #         image_processor,
+    #         model.config
+    #     ).to(model.device, dtype=torch.float16)
+    #
+    #     # Tokenize and Generate Output
+    #     input_ids = (
+    #         tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
+    #         .unsqueeze(0)
+    #         .cuda()
+    #     )
+    #
+    #     with torch.inference_mode():
+    #         output_ids = model.generate(
+    #             input_ids,
+    #             images=images_tensor,
+    #             image_sizes=image_sizes,
+    #             do_sample=True if args.temperature > 0 else False,
+    #             temperature=args.temperature,
+    #             top_p=args.top_p,
+    #             num_beams=args.num_beams,
+    #             max_new_tokens=args.max_new_tokens,
+    #             use_cache=True,
+    #         )
+    #
+    #     outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+    #     print("\nResponse: ", outputs)
 
 
 if __name__ == "__main__":
