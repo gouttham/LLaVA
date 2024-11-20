@@ -2,6 +2,8 @@ import argparse
 import torch
 import os,sys
 import json
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, '..'))
@@ -185,7 +187,8 @@ def eval_model(args):
 
     val_json = json.load(open("/localscratch/gna23/LLaVA/v1/cd_validation/dataset.json"))
 
-    acc = []
+    pds = []
+    gts = []
     ctr = 0
     for val in val_json[:10]:
         cur_out = []
@@ -254,12 +257,22 @@ def eval_model(args):
         print(cur_out)
         pd = get_max_repeated_string(cur_out)
         print(pd,gt)
-        if pd==gt:
-            acc.append(1)
-        else:
-            acc.append(0)
-        print(acc)
-    print("acc : ",sum(acc)/len(acc))
+        pds.append(pd)
+        gts.append(gt)
+
+    # Calculating metrics
+    accuracy = accuracy_score(gts, pds)
+    f1 = f1_score(gts, pds, average='weighted')  # 'weighted' accounts for label imbalance
+    precision = precision_score(gts, pds, average='weighted')
+    recall = recall_score(gts, pds, average='weighted')
+    conf_matrix = confusion_matrix(gts, pds, labels=list(set(gts)))
+
+    # Output results
+    print("Accuracy:", accuracy)
+    print("F1 Score:", f1)
+    print("Precision:", precision)
+    print("Recall:", recall)
+    print("Confusion Matrix:\n", conf_matrix)
 
 
 
