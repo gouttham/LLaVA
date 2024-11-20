@@ -191,7 +191,7 @@ def eval_model(args):
         cur_out = []
         print(ctr,end='\r')
         ctr+=1
-        for _ in range(2):
+        for _ in range(3):
             print(val["image"])
             im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
             for ech in val["conversations"]:
