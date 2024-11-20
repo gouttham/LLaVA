@@ -926,6 +926,11 @@ def train(attn_implementation=None):
         vision_tower.to(dtype=torch.bfloat16 if training_args.bf16 else torch.float16, device=training_args.device)
 
         data_args.image_processor = vision_tower.image_processor
+        print(data_args.image_processor)
+        print(data_args.image_processor.image_mean)
+        print(data_args.image_processor.crop_size)
+        0/0
+
         data_args.is_multimodal = True
 
         model.config.image_aspect_ratio = data_args.image_aspect_ratio
