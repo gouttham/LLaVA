@@ -190,7 +190,7 @@ def eval_model(args):
     pds = []
     gts = []
     ctr = 0
-    for val in val_json[:10]:
+    for val in val_json:
         cur_out = []
         print(ctr,end='\r')
         ctr+=1
