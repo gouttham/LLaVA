@@ -261,11 +261,12 @@ def eval_model(args):
         gts.append(gt)
 
     # Calculating metrics
+    classes = list(set(gts))
     accuracy = accuracy_score(gts, pds)
     f1 = f1_score(gts, pds, average='weighted')  # 'weighted' accounts for label imbalance
     precision = precision_score(gts, pds, average='weighted')
     recall = recall_score(gts, pds, average='weighted')
-    conf_matrix = confusion_matrix(gts, pds, labels=list(set(gts)))
+    conf_matrix = confusion_matrix(gts, pds, labels=classes)
 
     # Output results
     print("Accuracy:", accuracy)
@@ -273,6 +274,17 @@ def eval_model(args):
     print("Precision:", precision)
     print("Recall:", recall)
     print("Confusion Matrix:\n", conf_matrix)
+
+
+    class_wise_accuracy = {}
+    for idx, cls in enumerate(classes):
+        true_positive = conf_matrix[idx, idx]  # Diagonal element for the class
+        total_samples = conf_matrix[idx, :].sum()  # Total samples for the class
+        accuracy = true_positive / total_samples if total_samples > 0 else 0
+        class_wise_accuracy[cls] = accuracy
+    print("Class-wise Accuracy:")
+    for cls, acc in class_wise_accuracy.items():
+        print(f"  {cls}: {acc:.2f}")
 
 
 
