@@ -18,9 +18,9 @@ CUDA_VISIBLE_DEVICES=0 python /localscratch/gna23/LLaVA/llava/train/train_mem.py
     --bf16 True \
     --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls1 \
     --num_train_epochs 500 \
-    --per_device_train_batch_size 16 \ # Adjusted for single GPU
-    --per_device_eval_batch_size 16 \ # Adjusted for single GPU
-    --gradient_accumulation_steps 2 \ # Adjust to maintain effective batch size
+    --per_device_train_batch_size 16 \
+    --per_device_eval_batch_size 16 \
+    --gradient_accumulation_steps 2 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 50000 \
