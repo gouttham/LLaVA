@@ -771,7 +771,7 @@ class LazySupervisedDataset(Dataset):
             else:
                 sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]),self.data_args)
 
-            print(item, sec_image_file, sources)
+            print(item, image_file,sec_image_file, sources)
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
         data_dict = preprocess(
