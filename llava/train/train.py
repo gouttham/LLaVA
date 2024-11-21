@@ -821,8 +821,8 @@ class DataCollatorForSupervisedDataset(object):
         if 'image' in instances[0]:
             images = [instance['image'] for instance in instances]
             if all(x is not None and x[0].shape == images[0][0].shape for x in images):
-                print('YY')
-                batch['images'] = torch.stack(images)
+                L, R = zip(*images)
+                batch['images'] = [torch.stack(L),torch.stack(R)]
             else:
                 print('NN')
                 batch['images'] = images
