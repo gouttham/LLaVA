@@ -204,6 +204,8 @@ class LlavaMetaForCausalLM(ABC):
             # print(images[1].shape)
             import os
 
+            print(input_ids.shape)
+
             if int(os.getenv("LOCAL_RANK", 0)) == 0:
                 tensor1 = images[0]
                 tensor2 = images[1]
