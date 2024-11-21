@@ -773,7 +773,7 @@ class LazySupervisedDataset(Dataset):
                 image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
 
 
-            print(item, image_file,sec_image_file, sources)
+            # print(item, image_file,sec_image_file, sources)
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
         data_dict = preprocess(
@@ -820,9 +820,11 @@ class DataCollatorForSupervisedDataset(object):
 
         if 'image' in instances[0]:
             images = [instance['image'] for instance in instances]
-            if all(x is not None and x.shape == images[0].shape for x in images):
+            if all(x is not None and x[0].shape == images[0][0].shape for x in images):
+                print('YY')
                 batch['images'] = torch.stack(images)
             else:
+                print('NN')
                 batch['images'] = images
 
         return batch
