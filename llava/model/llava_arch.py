@@ -149,8 +149,8 @@ class LlavaMetaForCausalLM(ABC):
         vision_tower = self.get_vision_tower()
         if vision_tower is None or images is None or input_ids.shape[1] == 1:
             return input_ids, position_ids, attention_mask, past_key_values, None, labels
-        if False:
-        # if type(images) is list or images.ndim == 5:
+        # if False:
+        if type(images) is list or images.ndim == 5:
             if type(images) is list:
                 images = [x.unsqueeze(0) if x.ndim == 3 else x for x in images]
             concat_images = torch.cat([image for image in images], dim=0)
@@ -159,6 +159,8 @@ class LlavaMetaForCausalLM(ABC):
             image_features = torch.split(image_features, split_sizes, dim=0)
             mm_patch_merge_type = getattr(self.config, 'mm_patch_merge_type', 'flat')
             image_aspect_ratio = getattr(self.config, 'image_aspect_ratio', 'square')
+            mm_patch_merge_type = 'spatial'
+            image_aspect_ratio = 'anyres'
             print(mm_patch_merge_type)
             if mm_patch_merge_type == 'flat':
                 image_features = [x.flatten(0, 1) for x in image_features]
@@ -203,60 +205,56 @@ class LlavaMetaForCausalLM(ABC):
             # print(images[0].shape)
             # print(images[1].shape)
             import os
-
-
-
-
-            if int(os.getenv("LOCAL_RANK", 0)) == 0:
-                import transformers
-
-                tokenizer = transformers.AutoTokenizer.from_pretrained(
-                    "liuhaotian/llava-v1.5-7b",
-                    cache_dir="/localscratch/gna23/LLaVA/downloads/",
-                    model_max_length=2048,
-                    padding_side="right"
-                )
-                #
-                # print(input_ids.shape)
-                # for ech_ids in input_ids:
-                #     gt = tokenizer.decode(ech_ids)
-                #     print(gt)
-
-                ll = []
-                for ech in labels:
-                    filtered_list = [x for x in ech if x != -100]
-                    print(filtered_list)
-                    oo = tokenizer.decode(filtered_list)
-                    ll.append(oo.split(' ')[0])
-
-                tensor1 = images[0]
-                tensor2 = images[1]
-                import torch
-                import torchvision.transforms as T
-                from PIL import Image
-                import os
-                output_dir="/localscratch/gna23/LLaVA/downloads/debug/"
-                os.makedirs(output_dir, exist_ok=True)
-
-                # Transform for converting tensor to PIL Image
-                to_pil = T.ToPILImage()
-
-
-                for i in range(tensor1.shape[0]):
-                    img1 = to_pil(tensor1[i])  # Convert first image to PIL
-                    img2 = to_pil(tensor2[i])  # Convert second image to PIL
-
-                    # Combine the images side-by-side
-                    combined_width = img1.width + img2.width
-                    combined_height = max(img1.height, img2.height)
-                    combined_image = Image.new("RGB", (combined_width, combined_height))
-                    combined_image.paste(img1, (0, 0))
-                    combined_image.paste(img2, (img1.width, 0))
-
-                    # Save the combined image
-                    combined_image.save(os.path.join(output_dir, f"image_pair_{ll[i]}_{i + 1}.png"))
-
-                0/0
+            # if int(os.getenv("LOCAL_RANK", 0)) == 0:
+            #     import transformers
+            #
+            #     tokenizer = transformers.AutoTokenizer.from_pretrained(
+            #         "liuhaotian/llava-v1.5-7b",
+            #         cache_dir="/localscratch/gna23/LLaVA/downloads/",
+            #         model_max_length=2048,
+            #         padding_side="right"
+            #     )
+            #     #
+            #     # print(input_ids.shape)
+            #     # for ech_ids in input_ids:
+            #     #     gt = tokenizer.decode(ech_ids)
+            #     #     print(gt)
+            #
+            #     ll = []
+            #     for ech in labels:
+            #         filtered_list = [x for x in ech if x != -100]
+            #         print(filtered_list)
+            #         oo = tokenizer.decode(filtered_list)
+            #         ll.append(oo.split(' ')[0])
+            #
+            #     tensor1 = images[0]
+            #     tensor2 = images[1]
+            #     import torch
+            #     import torchvision.transforms as T
+            #     from PIL import Image
+            #     import os
+            #     output_dir="/localscratch/gna23/LLaVA/downloads/debug/"
+            #     os.makedirs(output_dir, exist_ok=True)
+            #
+            #     # Transform for converting tensor to PIL Image
+            #     to_pil = T.ToPILImage()
+            #
+            #
+            #     for i in range(tensor1.shape[0]):
+            #         img1 = to_pil(tensor1[i])  # Convert first image to PIL
+            #         img2 = to_pil(tensor2[i])  # Convert second image to PIL
+            #
+            #         # Combine the images side-by-side
+            #         combined_width = img1.width + img2.width
+            #         combined_height = max(img1.height, img2.height)
+            #         combined_image = Image.new("RGB", (combined_width, combined_height))
+            #         combined_image.paste(img1, (0, 0))
+            #         combined_image.paste(img2, (img1.width, 0))
+            #
+            #         # Save the combined image
+            #         combined_image.save(os.path.join(output_dir, f"image_pair_{ll[i]}_{i + 1}.png"))
+            #
+            #     0/0
             pre_image_features = self.encode_images(images[0])
             post_image_features = self.encode_images(images[1])
             image_features = torch.cat([pre_image_features, post_image_features], dim=-2)
