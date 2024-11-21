@@ -738,8 +738,17 @@ class LazySupervisedDataset(Dataset):
                     no_i = random.randint(0, ctr)
 
                 sec_image_file = self.list_data_dict[no_i]['image']
+
+                no_source = copy.deepcopy([e["conversations"] for e in sources])
+                for ech in no_source:
+                    if ech[0]["from"] == "gpt":
+                        ech[0]["value"] = "No"
+                sources = preprocess_multimodal(no_source, self.data_args)
+
             else:
                 sec_image_file = self.list_data_dict[i]['image']
+
+                sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
 
 
             image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
@@ -762,14 +771,6 @@ class LazySupervisedDataset(Dataset):
             else:
                 image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
 
-            if item == 1:
-                no_source = copy.deepcopy([e["conversations"] for e in sources])
-                for ech in no_source:
-                    if ech[0]["from"] == "gpt":
-                        ech[0]["value"]="No"
-                sources = preprocess_multimodal(no_source, self.data_args)
-            else:
-                sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]),self.data_args)
 
             print(item, image_file,sec_image_file, sources)
         else:
