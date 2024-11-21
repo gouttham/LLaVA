@@ -224,7 +224,7 @@ def eval_model(args):
                     qs = ech["value"]
                 elif ech["from"] == "gpt":
                     gt = ech["value"]
-            print(item,val["image"],val2["image"],gt)
+            # print(item,val["image"],val2["image"],gt)
             image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
             if IMAGE_PLACEHOLDER in qs:
                 if model.config.mm_use_im_start_end:
