@@ -187,7 +187,7 @@ def eval_model(args):
     else:
         args.conv_mode = conv_mode
 
-    val_json = json.load(open("/localscratch/gna23/LLaVA/v1/cd_validation/dataset.json"))
+    val_json = json.load(open("/localscratch/gna23/LLaVA/v2/cd_validation/dataset.json"))
 
     pds = []
     gts = []
