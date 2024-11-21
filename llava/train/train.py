@@ -739,7 +739,7 @@ class LazySupervisedDataset(Dataset):
 
                 sec_image_file = self.list_data_dict[random.choice(no_i)]['image']
             else:
-                sec_image_file = self.list_data_dict[random.choice(i)]['image']
+                sec_image_file = self.list_data_dict[i]['image']
 
 
             image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
