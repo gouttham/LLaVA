@@ -200,6 +200,8 @@ class LlavaMetaForCausalLM(ABC):
             else:
                 raise ValueError(f"Unexpected mm_patch_merge_type: {self.config.mm_patch_merge_type}")
         else:
+            print(images[0].shape)
+            print(images[1].shape)
             pre_image_features = self.encode_images(images[0])
             post_image_features = self.encode_images(images[1])
             image_features = torch.cat([pre_image_features, post_image_features], dim=-2)
