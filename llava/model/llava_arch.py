@@ -159,6 +159,7 @@ class LlavaMetaForCausalLM(ABC):
             image_features = torch.split(image_features, split_sizes, dim=0)
             mm_patch_merge_type = getattr(self.config, 'mm_patch_merge_type', 'flat')
             image_aspect_ratio = getattr(self.config, 'image_aspect_ratio', 'square')
+            print(mm_patch_merge_type)
             if mm_patch_merge_type == 'flat':
                 image_features = [x.flatten(0, 1) for x in image_features]
             elif mm_patch_merge_type.startswith('spatial'):
@@ -195,16 +196,12 @@ class LlavaMetaForCausalLM(ABC):
                                 self.model.image_newline[None].to(image_feature.device)
                             ), dim=0)
                     new_image_features.append(image_feature)
-                import pdb;
-                pdb.set_trace()
                 image_features = new_image_features
             else:
                 raise ValueError(f"Unexpected mm_patch_merge_type: {self.config.mm_patch_merge_type}")
         else:
             image_features = self.encode_images(images)
-
-        import pdb;
-        pdb.set_trace()
+        print("image_features : ",image_features.shape)
 
         # TODO: image start / end is not implemented here to support pretraining.
         if getattr(self.config, 'tune_mm_mlp_adapter', False) and getattr(self.config, 'mm_use_im_start_end', False):
