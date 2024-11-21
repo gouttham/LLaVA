@@ -821,7 +821,9 @@ class DataCollatorForSupervisedDataset(object):
         labels = self.pad_sequence(labels, batch_first=True, padding_value=IGNORE_INDEX)
         batch = dict(input_ids=input_ids, labels=labels.long() if labels.dtype == torch.int32 else labels, attention_mask=input_ids.ne(self.tokenizer.pad_token_id))
         # batch = dict(input_ids=input_ids, labels=labels, attention_mask=input_ids.ne(self.tokenizer.pad_token_id), ids=ids)
-        print(instances)
+        print("******************************************************")
+        print(instances[0])
+        print("******************************************************")
         import pdb;pdb.set_trace()
         if "image" in instances[0]:
             images = [instance["image"] for instance in instances]
