@@ -195,10 +195,14 @@ class LlavaMetaForCausalLM(ABC):
                                 self.model.image_newline[None].to(image_feature.device)
                             ), dim=0)
                     new_image_features.append(image_feature)
+                import pdb;
+                pdb.set_trace()
                 image_features = new_image_features
             else:
                 raise ValueError(f"Unexpected mm_patch_merge_type: {self.config.mm_patch_merge_type}")
         else:
+            import pdb;
+            pdb.set_trace()
             image_features = self.encode_images(images)
 
         # TODO: image start / end is not implemented here to support pretraining.
