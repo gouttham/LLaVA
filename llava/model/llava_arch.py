@@ -208,19 +208,21 @@ class LlavaMetaForCausalLM(ABC):
 
 
             if int(os.getenv("LOCAL_RANK", 0)) == 0:
-                import transformers
+                # import transformers
+                #
+                # tokenizer = transformers.AutoTokenizer.from_pretrained(
+                #     "liuhaotian/llava-v1.5-7b",
+                #     cache_dir="/localscratch/gna23/LLaVA/downloads/",
+                #     model_max_length=2048,
+                #     padding_side="right"
+                # )
+                #
+                # print(input_ids.shape)
+                # for ech_ids in input_ids:
+                #     gt = tokenizer.decode(ech_ids)
+                #     print(gt)
 
-                tokenizer = transformers.AutoTokenizer.from_pretrained(
-                    "liuhaotian/llava-v1.5-7b",
-                    cache_dir="/localscratch/gna23/LLaVA/downloads/",
-                    model_max_length=2048,
-                    padding_side="right"
-                )
-
-                print(input_ids.shape)
-                for ech_ids in input_ids:
-                    gt = tokenizer.decode(ech_ids)
-                    print(gt)
+                print(labels)
 
                 tensor1 = images[0]
                 tensor2 = images[1]
