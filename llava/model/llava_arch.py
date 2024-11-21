@@ -222,10 +222,12 @@ class LlavaMetaForCausalLM(ABC):
                 #     gt = tokenizer.decode(ech_ids)
                 #     print(gt)
 
+                ll = []
                 for ech in labels:
                     filtered_list = [x for x in ech if x != -100]
                     print(filtered_list)
-                    print(tokenizer.decode(filtered_list))
+                    oo = tokenizer.decode(filtered_list)
+                    ll.append(oo.split(' ')[0])
 
                 tensor1 = images[0]
                 tensor2 = images[1]
@@ -239,6 +241,7 @@ class LlavaMetaForCausalLM(ABC):
                 # Transform for converting tensor to PIL Image
                 to_pil = T.ToPILImage()
 
+
                 for i in range(tensor1.shape[0]):
                     img1 = to_pil(tensor1[i])  # Convert first image to PIL
                     img2 = to_pil(tensor2[i])  # Convert second image to PIL
@@ -251,7 +254,7 @@ class LlavaMetaForCausalLM(ABC):
                     combined_image.paste(img2, (img1.width, 0))
 
                     # Save the combined image
-                    combined_image.save(os.path.join(output_dir, f"image_pair_{i + 1}.png"))
+                    combined_image.save(os.path.join(output_dir, f"image_pair_{ll[i]}_{i + 1}.png"))
 
                 0/0
             pre_image_features = self.encode_images(images[0])
