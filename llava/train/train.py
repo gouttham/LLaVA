@@ -734,7 +734,7 @@ class LazySupervisedDataset(Dataset):
             if item == 1:
 
 
-                no_i = random.randint(0, N)
+                no_i = random.randint(0, N-1)
                 while no_i == i:
                     no_i = random.randint(0, N-1)
 
