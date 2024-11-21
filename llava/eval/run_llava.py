@@ -193,7 +193,7 @@ def eval_model(args):
     gts = []
     ctr = 0
     N = len(val_json)
-    for val_idx in enumerate(val_json):
+    for val_idx,_ in enumerate(val_json):
         item = random.choice([0, 1])
         val = copy.deepcopy(val_json[val_idx])
 
