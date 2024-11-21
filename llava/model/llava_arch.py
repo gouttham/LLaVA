@@ -202,6 +202,36 @@ class LlavaMetaForCausalLM(ABC):
         else:
             # print(images[0].shape)
             # print(images[1].shape)
+            import os
+
+            if int(os.getenv("LOCAL_RANK", 0)) == 0:
+                tensor1 = images[0]
+                tensor2 = images[1]
+                import torch
+                import torchvision.transforms as T
+                from PIL import Image
+                import os
+                output_dir="/localscratch/gna23/LLaVA/downloads/debug/"
+                os.makedirs(output_dir, exist_ok=True)
+
+                # Transform for converting tensor to PIL Image
+                to_pil = T.ToPILImage()
+
+                for i in range(tensor1.shape[0]):
+                    img1 = to_pil(tensor1[i])  # Convert first image to PIL
+                    img2 = to_pil(tensor2[i])  # Convert second image to PIL
+
+                    # Combine the images side-by-side
+                    combined_width = img1.width + img2.width
+                    combined_height = max(img1.height, img2.height)
+                    combined_image = Image.new("RGB", (combined_width, combined_height))
+                    combined_image.paste(img1, (0, 0))
+                    combined_image.paste(img2, (img1.width, 0))
+
+                    # Save the combined image
+                    combined_image.save(os.path.join(output_dir, f"image_pair_{i + 1}.png"))
+
+                0/0
             pre_image_features = self.encode_images(images[0])
             post_image_features = self.encode_images(images[1])
             image_features = torch.cat([pre_image_features, post_image_features], dim=-2)
