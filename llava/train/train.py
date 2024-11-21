@@ -700,6 +700,7 @@ class LazySupervisedDataset(Dataset):
         return length_list
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
+        N = len(self.list_data_dict)
         sources = self.list_data_dict[i]
         if isinstance(i, int):
             sources = [sources]
@@ -731,11 +732,11 @@ class LazySupervisedDataset(Dataset):
 
             item = random.choice([0,1])
             if item == 1:
-                ctr = len(self.list_data_dict)
 
-                no_i = random.randint(0, ctr)
+
+                no_i = random.randint(0, N)
                 while no_i == i:
-                    no_i = random.randint(0, ctr)
+                    no_i = random.randint(0, N-1)
 
                 sec_image_file = self.list_data_dict[no_i]['image']
 
