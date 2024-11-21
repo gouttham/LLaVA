@@ -206,7 +206,17 @@ class LlavaMetaForCausalLM(ABC):
 
             print(input_ids.shape)
 
+
             if int(os.getenv("LOCAL_RANK", 0)) == 0:
+                import transformers
+
+                tokenizer = transformers.AutoTokenizer.from_pretrained(
+                    "liuhaotian/llava-v1.5-7b",
+                    cache_dir="/localscratch/gna23/LLaVA/downloads/",
+                    model_max_length=2048,
+                    padding_side="right"
+                )
+
                 tensor1 = images[0]
                 tensor2 = images[1]
                 import torch
