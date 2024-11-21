@@ -218,8 +218,9 @@ class LlavaMetaForCausalLM(ABC):
                 )
 
                 print(input_ids.shape)
-                gt = tokenizer.decode(input_ids)
-                print(gt)
+                for ech_ids in input_ids:
+                    gt = tokenizer.decode(ech_ids)
+                    print(gt)
 
                 tensor1 = images[0]
                 tensor2 = images[1]
