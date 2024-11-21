@@ -826,7 +826,6 @@ class DataCollatorForSupervisedDataset(object):
             images = [instance["image"] for instance in instances]
 
             batch["image_sizes"] = [im[1] for im_list in images for im in im_list]
-            batch["modalities"] = [im[2] for im_list in images for im in im_list]
             images = [im[0] for im_list in images for im in im_list]
 
             # if all(x is not None and x.shape == images[0].shape for x in images):
