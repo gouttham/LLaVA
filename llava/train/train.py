@@ -734,10 +734,10 @@ class LazySupervisedDataset(Dataset):
                 ctr = len(self.list_data_dict)
 
                 no_i = random.randint(0, ctr)
-                if no_i == i:
+                while no_i == i:
                     no_i = random.randint(0, ctr)
 
-                sec_image_file = self.list_data_dict[random.choice(no_i)]['image']
+                sec_image_file = self.list_data_dict[no_i]['image']
             else:
                 sec_image_file = self.list_data_dict[i]['image']
 
