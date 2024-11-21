@@ -1,4 +1,6 @@
 import argparse
+import copy
+
 import torch
 import os,sys
 import json
@@ -13,7 +15,7 @@ print("parent_dir : ",parent_dir)
 parent_dir = os.path.abspath(os.path.join(current_dir, '../..'))
 sys.path.append(parent_dir)
 print("parent_dir : ",parent_dir)
-
+import random
 
 
 from llava.constants import (
@@ -190,19 +192,39 @@ def eval_model(args):
     pds = []
     gts = []
     ctr = 0
-    for val in val_json:
+    N = len(val_json)
+    for val_idx in enumerate(val_json):
+        item = random.choice([0, 1])
+        val = copy.deepcopy(val_json[val_idx])
+
+        if item == 1:
+            no_i = random.randint(0, N - 1)
+            while no_i == val_idx:
+                no_i = random.randint(0, N - 1)
+            val2 = copy.deepcopy(val_json[no_i])
+
+            for ech in val["conversations"]:
+                if ech["from"] == "gpt":
+                    ech["value"] = "No"
+        else:
+            val2 = copy.deepcopy(val)
+
         cur_out = []
         print(ctr,end='\r')
         ctr+=1
         for _ in range(1):
             print(val["image"])
+
+
+
             im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
+            im_nam2 = ["/localscratch/gna23/LLaVA/v1/cd_images/" + val2["image"]]
             for ech in val["conversations"]:
                 if ech["from"] == "human":
                     qs = ech["value"]
                 elif ech["from"] == "gpt":
                     gt = ech["value"]
-
+            print(item,val["image"],val2["image"],gt)
             image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
             if IMAGE_PLACEHOLDER in qs:
                 if model.config.mm_use_im_start_end:
@@ -231,6 +253,16 @@ def eval_model(args):
                 model.config
             ).to(model.device, dtype=torch.float16)
 
+            # Load and Process Image
+            image_files2 = im_nam2  # Wrap in list for compatibility
+            images2 = load_images(image_files2)
+            image_sizes2 = [x.size for x in images2]
+            images_tensor2 = process_images(
+                images,
+                image_processor,
+                model.config
+            ).to(model.device, dtype=torch.float16)
+
             # Tokenize and Generate Output
             input_ids = (
                 tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
@@ -241,8 +273,8 @@ def eval_model(args):
             with torch.inference_mode():
                 output_ids = model.generate(
                     input_ids,
-                    images=images_tensor,
-                    image_sizes=image_sizes,
+                    images=[images_tensor,images_tensor2],
+                    image_sizes=[image_sizes,image_sizes2],
                     do_sample=True if args.temperature > 0 else False,
                     temperature=args.temperature,
                     top_p=args.top_p,
