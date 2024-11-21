@@ -741,8 +741,9 @@ class LazySupervisedDataset(Dataset):
 
                 no_source = copy.deepcopy([e["conversations"] for e in sources])
                 for ech in no_source:
-                    if ech["from"] == "gpt":
-                        ech["value"] = "No"
+                    for ech_ech in ech:
+                        if ech_ech["from"] == "gpt":
+                            ech_ech["value"] = "No"
                 sources = preprocess_multimodal(no_source, self.data_args)
 
             else:
