@@ -37,6 +37,7 @@ from llava.mm_utils import tokenizer_image_token
 
 from PIL import Image
 import os
+import random
 
 os.environ["HF_HOME"] = "/localscratch/gna23/LLaVA/downloads/hf_home"
 os.environ["TRANSFORMERS_CACHE"] = "/localscratch/gna23/LLaVA/downloads/"
@@ -707,6 +708,7 @@ class LazySupervisedDataset(Dataset):
             image_file = self.list_data_dict[i]['image']
             image_folder = self.data_args.image_folder
             processor = self.data_args.image_processor
+
             image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
             if self.data_args.image_aspect_ratio == 'pad':
                 def expand2square(pil_img, background_color):
@@ -725,9 +727,51 @@ class LazySupervisedDataset(Dataset):
                 image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
             else:
                 image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
-            sources = preprocess_multimodal(
-                copy.deepcopy([e["conversations"] for e in sources]),
-                self.data_args)
+
+
+            item = random.choice([0,1])
+            if item == 1:
+                ctr = len(self.list_data_dict)
+
+                no_i = random.randint(0, ctr)
+                if no_i == i:
+                    no_i = random.randint(0, ctr)
+
+                sec_image_file = self.list_data_dict[random.choice(no_i)]['image']
+            else:
+                sec_image_file = self.list_data_dict[random.choice(i)]['image']
+
+
+            image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
+            if self.data_args.image_aspect_ratio == 'pad':
+                def expand2square(pil_img, background_color):
+                    width, height = pil_img.size
+                    if width == height:
+                        return pil_img
+                    elif width > height:
+                        result = Image.new(pil_img.mode, (width, width), background_color)
+                        result.paste(pil_img, (0, (width - height) // 2))
+                        return result
+                    else:
+                        result = Image.new(pil_img.mode, (height, height), background_color)
+                        result.paste(pil_img, ((height - width) // 2, 0))
+                        return result
+
+                image_2 = expand2square(image_2, tuple(int(x * 255) for x in processor.image_mean))
+                image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
+            else:
+                image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
+
+            if item == 1:
+                no_source = copy.deepcopy([e["conversations"] for e in sources])
+                for ech in no_source:
+                    if ech[0]["from"] == "gpt":
+                        ech[0]["value"]="No"
+                sources = preprocess_multimodal(no_source, self.data_args)
+            else:
+                sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]),self.data_args)
+
+            print(item, sec_image_file, sources)
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
         data_dict = preprocess(
@@ -740,7 +784,7 @@ class LazySupervisedDataset(Dataset):
 
         # image exist in the data
         if 'image' in self.list_data_dict[i]:
-            data_dict['image'] = image
+            data_dict['image'] = [image,image_2]
         elif self.data_args.is_multimodal:
             # image does not exist in the data, but the model is multimodal
             crop_size = self.data_args.image_processor.crop_size
@@ -926,10 +970,10 @@ def train(attn_implementation=None):
         vision_tower.to(dtype=torch.bfloat16 if training_args.bf16 else torch.float16, device=training_args.device)
 
         data_args.image_processor = vision_tower.image_processor
-        print(data_args.image_processor)
-        print(data_args.image_processor.image_mean)
-        print(data_args.image_processor.crop_size)
-        0/0
+        # print(data_args.image_processor)
+        # print(data_args.image_processor.image_mean)
+        # print(data_args.image_processor.crop_size)
+        # 0/0
 
         data_args.is_multimodal = True
 
