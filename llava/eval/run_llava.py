@@ -187,7 +187,7 @@ def eval_model(args):
     else:
         args.conv_mode = conv_mode
 
-    val_json = json.load(open("/localscratch/gna23/LLaVA/v2/cd_validation/dataset.json"))
+    val_json = json.load(open("/localscratch/gna23/LLaVA/v2/cd_train/dataset.json"))
 
     pds = []
     gts = []
@@ -214,8 +214,6 @@ def eval_model(args):
         ctr+=1
         for _ in range(1):
             print(val["image"])
-
-
 
             im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
             im_nam2 = ["/localscratch/gna23/LLaVA/v1/cd_images/" + val2["image"]]
