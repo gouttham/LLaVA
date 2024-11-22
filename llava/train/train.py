@@ -830,7 +830,6 @@ class DataCollatorForSupervisedDataset(object):
             batch["image_sizes"] = [im[1] for im_list in images for im in im_list]
             images = [im[0] for im_list in images for im in im_list]
             print("2 : ",len(images))
-            0/0
             # if all(x is not None and x.shape == images[0].shape for x in images):
                 # Image: (N, P, C, H, W)
                 # Video: (N, F, C, H, W)
