@@ -321,11 +321,9 @@ def preprocess_multimodal(
 ) -> Dict:
 
     is_multimodal = data_args.is_multimodal
-    print(is_multimodal,conversation_lib.default_conversation.version,data_args.mm_use_im_start_end)
-    print(sources)
+    # print(is_multimodal,conversation_lib.default_conversation.version,data_args.mm_use_im_start_end)
+    # print(sources)
 
-    import pdb
-    pdb.set_trace()
     if not is_multimodal:
         return sources
 
