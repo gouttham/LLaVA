@@ -700,6 +700,7 @@ class LazySupervisedDataset(Dataset):
         return length_list
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
+        contrastive = False
         N = len(self.list_data_dict)
         sources = self.list_data_dict[i]
         if isinstance(i, int):
@@ -730,51 +731,49 @@ class LazySupervisedDataset(Dataset):
                 image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
 
 
-            item = random.choice([0,1])
-            if item == 1:
+            if contrastive:
+                item = random.choice([0,1])
 
-
-                no_i = random.randint(0, N-1)
-                while no_i == i:
+                if item == 1:
                     no_i = random.randint(0, N-1)
+                    while no_i == i:
+                        no_i = random.randint(0, N-1)
 
-                sec_image_file = self.list_data_dict[no_i]['image']
+                    sec_image_file = self.list_data_dict[no_i]['image']
 
-                no_source = copy.deepcopy([e["conversations"] for e in sources])
-                for ech in no_source:
-                    for ech_ech in ech:
-                        if ech_ech["from"] == "gpt":
-                            ech_ech["value"] = "No"
-                sources = preprocess_multimodal(no_source, self.data_args)
-
+                    no_source = copy.deepcopy([e["conversations"] for e in sources])
+                    for ech in no_source:
+                        for ech_ech in ech:
+                            if ech_ech["from"] == "gpt":
+                                ech_ech["value"] = "No"
+                    sources = preprocess_multimodal(no_source, self.data_args)
+                else:
+                    sec_image_file = self.list_data_dict[i]['image']
+                    sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
             else:
-                sec_image_file = self.list_data_dict[i]['image']
-
                 sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
 
+            if contrastive:
+                image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
+                if self.data_args.image_aspect_ratio == 'pad':
+                    def expand2square(pil_img, background_color):
+                        width, height = pil_img.size
+                        if width == height:
+                            return pil_img
+                        elif width > height:
+                            result = Image.new(pil_img.mode, (width, width), background_color)
+                            result.paste(pil_img, (0, (width - height) // 2))
+                            return result
+                        else:
+                            result = Image.new(pil_img.mode, (height, height), background_color)
+                            result.paste(pil_img, ((height - width) // 2, 0))
+                            return result
 
-            image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
-            if self.data_args.image_aspect_ratio == 'pad':
-                def expand2square(pil_img, background_color):
-                    width, height = pil_img.size
-                    if width == height:
-                        return pil_img
-                    elif width > height:
-                        result = Image.new(pil_img.mode, (width, width), background_color)
-                        result.paste(pil_img, (0, (width - height) // 2))
-                        return result
-                    else:
-                        result = Image.new(pil_img.mode, (height, height), background_color)
-                        result.paste(pil_img, ((height - width) // 2, 0))
-                        return result
-
-                image_2 = expand2square(image_2, tuple(int(x * 255) for x in processor.image_mean))
-                image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
-            else:
-                image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
-
-
-            # print(item, image_file,sec_image_file, sources)
+                    image_2 = expand2square(image_2, tuple(int(x * 255) for x in processor.image_mean))
+                    image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
+                else:
+                    image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
+                print(item, image_file,sec_image_file, sources)
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
         data_dict = preprocess(
@@ -787,8 +786,10 @@ class LazySupervisedDataset(Dataset):
 
         # image exist in the data
         if 'image' in self.list_data_dict[i]:
-            # data_dict['image'] = [image,image_2]
-            data_dict['image'] = image
+            if contrastive:
+                data_dict['image'] = [image,image_2]
+            else:
+                data_dict['image'] = image
         elif self.data_args.is_multimodal:
             # image does not exist in the data, but the model is multimodal
             crop_size = self.data_args.image_processor.crop_size
