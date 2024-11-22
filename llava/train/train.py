@@ -732,6 +732,7 @@ class LazySupervisedDataset(Dataset):
 
 
             if contrastive:
+                image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + "\n"
                 item = random.choice([0,1])
 
                 if item == 1:
@@ -746,10 +747,21 @@ class LazySupervisedDataset(Dataset):
                         for ech_ech in ech:
                             if ech_ech["from"] == "gpt":
                                 ech_ech["value"] = "No"
+                            elif ech_ech["from"] == "human":
+                                ech_ech["value"] = image_token_se+ech_ech["value"]
                     sources = preprocess_multimodal(no_source, self.data_args)
                 else:
+
+                    yes_source = copy.deepcopy([e["conversations"] for e in sources])
+
+                    for ech in yes_source:
+                        for ech_ech in ech:
+                            if ech_ech["from"] == "human":
+                                ech_ech["value"] = image_token_se+ech_ech["value"]
+
+
                     sec_image_file = self.list_data_dict[i]['image']
-                    sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
+                    sources = preprocess_multimodal(yes_source, self.data_args)
             else:
                 sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
 
