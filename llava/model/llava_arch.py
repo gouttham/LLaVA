@@ -255,9 +255,12 @@ class LlavaMetaForCausalLM(ABC):
             #         combined_image.save(os.path.join(output_dir, f"image_pair_{ll[i]}_{i + 1}.png"))
             #
             #     0/0
-            pre_image_features = self.encode_images(images[0])
-            post_image_features = self.encode_images(images[1])
-            image_features = torch.cat([pre_image_features, post_image_features], dim=-2)
+
+            # pre_image_features = self.encode_images(images[0])
+            # post_image_features = self.encode_images(images[1])
+            # image_features = torch.cat([pre_image_features, post_image_features], dim=-2)
+
+            image_features = self.encode_images(images)
 
             # print("image_features : ",image_features.shape)
 
