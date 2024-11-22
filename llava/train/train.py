@@ -322,6 +322,7 @@ def preprocess_multimodal(
 
     is_multimodal = data_args.is_multimodal
     print(is_multimodal)
+    print(sources)
 
     import pdb
     pdb.set_trace()
