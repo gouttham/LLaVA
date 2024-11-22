@@ -754,10 +754,11 @@ class LazySupervisedDataset(Dataset):
                 # image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN + "\n"
                 image_token_se = DEFAULT_IMAGE_TOKEN + "\n"
                 item = random.choice([0, 1, 2,3])
-                if item == 0 or item == 3:
-                    cs = random.choice([1,2,3,4])
-                    trans_sel = ["jitter", "blur", "grey", "crop"][cs]
 
+                cs = random.choice([1, 2, 3, 4])
+                trans_sel = ["jitter", "blur", "grey", "crop"][cs]
+
+                if item == 0 or item == 3:
                     comment = ["when compared with the first image, the second image is jittered",
                                "when compared with the first image, the second image is blurred",
                                "when compared with the first image, the second image is colourless",
