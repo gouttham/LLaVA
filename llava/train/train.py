@@ -319,6 +319,7 @@ def preprocess_multimodal(
     sources: Sequence[str],
     data_args: DataArguments
 ) -> Dict:
+    import pdb;pdb.set_trace()
     is_multimodal = data_args.is_multimodal
     if not is_multimodal:
         return sources
