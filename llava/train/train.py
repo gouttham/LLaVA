@@ -321,7 +321,7 @@ def preprocess_multimodal(
 ) -> Dict:
 
     is_multimodal = data_args.is_multimodal
-    print(is_multimodal)
+    print(is_multimodal,conversation_lib.default_conversation.version)
     print(sources)
 
     import pdb
