@@ -755,7 +755,7 @@ class LazySupervisedDataset(Dataset):
                 image_token_se = DEFAULT_IMAGE_TOKEN + "\n"
                 item = random.choice([0, 1, 2,3])
 
-                cs = random.choice([1, 2, 3, 4])
+                cs = random.choice([0, 1, 2, 3])
                 trans_sel = ["jitter", "blur", "grey", "crop"][cs]
 
                 if item == 0 or item == 3:
