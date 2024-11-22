@@ -19,9 +19,9 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem2.py \
     --bf16 True \
     --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls2 \
     --num_train_epochs 20 \
-    --per_device_train_batch_size 32 \
-    --per_device_eval_batch_size 32 \
-    --gradient_accumulation_steps 1 \
+    --per_device_train_batch_size 16 \
+    --per_device_eval_batch_size 16 \
+    --gradient_accumulation_steps 2 \
     --evaluation_strategy "no" \
     --save_strategy "steps" \
     --save_steps 50000 \
