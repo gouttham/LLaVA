@@ -33,7 +33,7 @@ from llava.train.llava_trainer import LLaVATrainer
 
 from llava import conversation as conversation_lib
 from llava.model import *
-from llava.mm_utils import process_highres_image, process_anyres_image, process_highres_image_crop_split, tokenizer_image_token
+from llava.mm_utils import tokenizer_image_token
 
 from PIL import Image
 import os
@@ -58,7 +58,6 @@ def rank0_print(*args):
 
 from packaging import version
 IS_TOKENIZER_GREATER_THAN_0_14 = version.parse(tokenizers.__version__) >= version.parse('0.14')
-
 
 
 @dataclass
@@ -699,224 +698,102 @@ class LazySupervisedDataset(Dataset):
             cur_len = cur_len if 'image' in sample else -cur_len
             length_list.append(cur_len)
         return length_list
-    def process_image(self, image_file, overwrite_image_aspect_ratio=None):
-        image_folder = self.data_args.image_folder
-        processor = self.data_args.image_processor
-        # print(f"\n\nInspecting the image path, folder = {image_folder}, image={image_file}\n\n")
-        try:
-            image = Image.open(os.path.join(image_folder, image_file)).convert("RGB")
-        except Exception as exn:
-            print(f"Failed to open image {image_file}. Exception:", exn)
-            raise exn
-
-        image_size = image.size
-        image_aspect_ratio = self.data_args.image_aspect_ratio
-        if overwrite_image_aspect_ratio is not None:
-            image_aspect_ratio = overwrite_image_aspect_ratio
-        if image_aspect_ratio == "highres":
-            image = process_highres_image(image, self.data_args.image_processor, self.data_args.image_grid_pinpoints)
-        elif image_aspect_ratio == "anyres" or "anyres_max" in image_aspect_ratio:
-            image = process_anyres_image(image, self.data_args.image_processor, self.data_args.image_grid_pinpoints)
-        elif image_aspect_ratio == "crop_split":
-            image = process_highres_image_crop_split(image, self.data_args)
-        elif image_aspect_ratio == "pad":
-
-            def expand2square(pil_img, background_color):
-                width, height = pil_img.size
-                if width == height:
-                    return pil_img
-                elif width > height:
-                    result = Image.new(pil_img.mode, (width, width), background_color)
-                    result.paste(pil_img, (0, (width - height) // 2))
-                    return result
-                else:
-                    result = Image.new(pil_img.mode, (height, height), background_color)
-                    result.paste(pil_img, ((height - width) // 2, 0))
-                    return result
-
-            image = expand2square(image, tuple(int(x * 255) for x in processor.image_mean))
-            image = processor.preprocess(image, return_tensors="pt")["pixel_values"][0]
-        else:
-            image = processor.preprocess(image, return_tensors="pt")["pixel_values"][0]
-        return image, image_size, "image"
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        # TODO: define number of retries somewhere else
-        num_base_retries = 3
-        num_final_retries = 300
-
-        # try the current sample first
-        for attempt_idx in range(num_base_retries):
-            try:
-                sample = self._get_item(i)
-                return sample
-            except Exception as e:
-                # sleep 1s in case it is a cloud disk issue
-                print(f"[Try #{attempt_idx}] Failed to fetch sample {i}. Exception:", e)
-
-        # try other samples, in case it is file corruption issue
-        for attempt_idx in range(num_base_retries):
-            try:
-                next_index = min(i + 1, len(self.list_data_dict) - 1)
-                # sample_idx = random.choice(range(len(self)))
-                sample = self._get_item(next_index)
-                return sample
-            except Exception as e:
-                # no need to sleep
-                print(f"[Try other #{attempt_idx}] Failed to fetch sample {next_index}. Exception:", e)
-                pass
-
-        try:
-            sample = self._get_item(i)
-            return sample
-        except Exception as e:
-            raise e
-
-    def _get_item(self, i) -> Dict[str, torch.Tensor]:
+        N = len(self.list_data_dict)
         sources = self.list_data_dict[i]
         if isinstance(i, int):
             sources = [sources]
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
+        if 'image' in sources[0]:
+            image_file = self.list_data_dict[i]['image']
+            image_folder = self.data_args.image_folder
+            processor = self.data_args.image_processor
 
-        if "image" in sources[0]:
-            image_file = self.list_data_dict[i]["image"]
-            if type(image_file) is list:
-                image = [self.process_image(f) for f in image_file]
-                # Handling multi images
-                # overwrite to process with simple pad
-                if len(image_file) > 1:
-                    image = [self.process_image(f, "pad") for f in image_file]
-                    image = [[im[0], im[1], "image"] for im in image]
+            image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
+            if self.data_args.image_aspect_ratio == 'pad':
+                def expand2square(pil_img, background_color):
+                    width, height = pil_img.size
+                    if width == height:
+                        return pil_img
+                    elif width > height:
+                        result = Image.new(pil_img.mode, (width, width), background_color)
+                        result.paste(pil_img, (0, (width - height) // 2))
+                        return result
+                    else:
+                        result = Image.new(pil_img.mode, (height, height), background_color)
+                        result.paste(pil_img, ((height - width) // 2, 0))
+                        return result
+                image = expand2square(image, tuple(int(x*255) for x in processor.image_mean))
+                image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
             else:
-                image = [self.process_image(image_file)]
-            sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
+                image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
 
-        sources = copy.deepcopy([e["conversations"] for e in sources])
 
-        has_image = ("image" in self.list_data_dict[i]) or ("video" in self.list_data_dict[i])
-        data_dict = preprocess(sources, self.tokenizer, has_image=has_image)
+            item = random.choice([0,1])
+            if item == 1:
 
-        if "prompt" in data_dict:
-            prompt = data_dict["prompt"]
+
+                no_i = random.randint(0, N-1)
+                while no_i == i:
+                    no_i = random.randint(0, N-1)
+
+                sec_image_file = self.list_data_dict[no_i]['image']
+
+                no_source = copy.deepcopy([e["conversations"] for e in sources])
+                for ech in no_source:
+                    for ech_ech in ech:
+                        if ech_ech["from"] == "gpt":
+                            ech_ech["value"] = "No"
+                sources = preprocess_multimodal(no_source, self.data_args)
+
+            else:
+                sec_image_file = self.list_data_dict[i]['image']
+
+                sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
+
+
+            image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
+            if self.data_args.image_aspect_ratio == 'pad':
+                def expand2square(pil_img, background_color):
+                    width, height = pil_img.size
+                    if width == height:
+                        return pil_img
+                    elif width > height:
+                        result = Image.new(pil_img.mode, (width, width), background_color)
+                        result.paste(pil_img, (0, (width - height) // 2))
+                        return result
+                    else:
+                        result = Image.new(pil_img.mode, (height, height), background_color)
+                        result.paste(pil_img, ((height - width) // 2, 0))
+                        return result
+
+                image_2 = expand2square(image_2, tuple(int(x * 255) for x in processor.image_mean))
+                image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
+            else:
+                image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
+
+
+            # print(item, image_file,sec_image_file, sources)
         else:
-            prompt = None
-
+            sources = copy.deepcopy([e["conversations"] for e in sources])
+        data_dict = preprocess(
+            sources,
+            self.tokenizer,
+            has_image=('image' in self.list_data_dict[i]))
         if isinstance(i, int):
-            data_dict = dict(input_ids=data_dict["input_ids"][0], labels=data_dict["labels"][0])
+            data_dict = dict(input_ids=data_dict["input_ids"][0],
+                             labels=data_dict["labels"][0])
 
         # image exist in the data
-        if "image" in self.list_data_dict[i]:
-            data_dict["image"] = image
-        elif "video" in self.list_data_dict[i]:
-            data_dict["image"] = image
+        if 'image' in self.list_data_dict[i]:
+            data_dict['image'] = [image,image_2]
         elif self.data_args.is_multimodal:
             # image does not exist in the data, but the model is multimodal
             crop_size = self.data_args.image_processor.crop_size
-            data_dict["image"] = [
-                (torch.zeros(1, 3, crop_size["height"], crop_size["width"]), (crop_size["width"], crop_size["height"]), "text"),
-            ]
-        # prompt exist in the data
-        if prompt is not None:
-            data_dict["prompt"] = prompt
-
-        data_dict["id"] = self.list_data_dict[i].get("id", i)
-
+            data_dict['image'] = torch.zeros(3, crop_size['height'], crop_size['width'])
         return data_dict
 
-    # def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-    #     N = len(self.list_data_dict)
-    #     sources = self.list_data_dict[i]
-    #     if isinstance(i, int):
-    #         sources = [sources]
-    #     assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
-    #     if 'image' in sources[0]:
-    #         image_file = self.list_data_dict[i]['image']
-    #         image_folder = self.data_args.image_folder
-    #         processor = self.data_args.image_processor
-    #
-    #         image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
-    #         if self.data_args.image_aspect_ratio == 'pad':
-    #             def expand2square(pil_img, background_color):
-    #                 width, height = pil_img.size
-    #                 if width == height:
-    #                     return pil_img
-    #                 elif width > height:
-    #                     result = Image.new(pil_img.mode, (width, width), background_color)
-    #                     result.paste(pil_img, (0, (width - height) // 2))
-    #                     return result
-    #                 else:
-    #                     result = Image.new(pil_img.mode, (height, height), background_color)
-    #                     result.paste(pil_img, ((height - width) // 2, 0))
-    #                     return result
-    #             image = expand2square(image, tuple(int(x*255) for x in processor.image_mean))
-    #             image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
-    #         else:
-    #             image = processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
-    #
-    #
-    #         item = random.choice([0,1])
-    #         if item == 1:
-    #
-    #
-    #             no_i = random.randint(0, N-1)
-    #             while no_i == i:
-    #                 no_i = random.randint(0, N-1)
-    #
-    #             sec_image_file = self.list_data_dict[no_i]['image']
-    #
-    #             no_source = copy.deepcopy([e["conversations"] for e in sources])
-    #             for ech in no_source:
-    #                 for ech_ech in ech:
-    #                     if ech_ech["from"] == "gpt":
-    #                         ech_ech["value"] = "No"
-    #             sources = preprocess_multimodal(no_source, self.data_args)
-    #
-    #         else:
-    #             sec_image_file = self.list_data_dict[i]['image']
-    #
-    #             sources = preprocess_multimodal(copy.deepcopy([e["conversations"] for e in sources]), self.data_args)
-    #
-    #
-    #         image_2 = Image.open(os.path.join(image_folder, sec_image_file)).convert('RGB')
-    #         if self.data_args.image_aspect_ratio == 'pad':
-    #             def expand2square(pil_img, background_color):
-    #                 width, height = pil_img.size
-    #                 if width == height:
-    #                     return pil_img
-    #                 elif width > height:
-    #                     result = Image.new(pil_img.mode, (width, width), background_color)
-    #                     result.paste(pil_img, (0, (width - height) // 2))
-    #                     return result
-    #                 else:
-    #                     result = Image.new(pil_img.mode, (height, height), background_color)
-    #                     result.paste(pil_img, ((height - width) // 2, 0))
-    #                     return result
-    #
-    #             image_2 = expand2square(image_2, tuple(int(x * 255) for x in processor.image_mean))
-    #             image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
-    #         else:
-    #             image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
-    #
-    #
-    #         # print(item, image_file,sec_image_file, sources)
-    #     else:
-    #         sources = copy.deepcopy([e["conversations"] for e in sources])
-    #     data_dict = preprocess(
-    #         sources,
-    #         self.tokenizer,
-    #         has_image=('image' in self.list_data_dict[i]))
-    #     if isinstance(i, int):
-    #         data_dict = dict(input_ids=data_dict["input_ids"][0],
-    #                          labels=data_dict["labels"][0])
-    #
-    #     # image exist in the data
-    #     if 'image' in self.list_data_dict[i]:
-    #         data_dict['image'] = [image,image_2]
-    #     elif self.data_args.is_multimodal:
-    #         # image does not exist in the data, but the model is multimodal
-    #         crop_size = self.data_args.image_processor.crop_size
-    #         data_dict['image'] = torch.zeros(3, crop_size['height'], crop_size['width'])
-    #     return data_dict
 
 
 @dataclass
@@ -925,79 +802,32 @@ class DataCollatorForSupervisedDataset(object):
 
     tokenizer: transformers.PreTrainedTokenizer
 
-    def pad_sequence(self, input_ids, batch_first, padding_value):
-        if self.tokenizer.padding_side == "left":
-            input_ids = [torch.flip(_input_ids, [0]) for _input_ids in input_ids]
-        input_ids = torch.nn.utils.rnn.pad_sequence(input_ids, batch_first=batch_first, padding_value=padding_value)
-        if self.tokenizer.padding_side == "left":
-            input_ids = torch.flip(input_ids, [1])
-        return input_ids
-
     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
-        input_ids, labels = tuple([instance[key] for instance in instances] for key in ("input_ids", "labels"))
-        # input_ids, labels, ids = tuple([instance[key] for instance in instances] for key in ("input_ids", "labels", "id"))
-        input_ids = [_input_ids[: self.tokenizer.model_max_length] for _input_ids in input_ids]
-        labels = [_labels[: self.tokenizer.model_max_length] for _labels in labels]
-        if self.tokenizer.pad_token_id is None:
-            # self.tokenizer.pad_token_id = self.tokenizer.eos_token_id  # FIXME: this could only be triggered for llama3 model.
-            self.tokenizer.pad_token_id = 0 # This gets the best result. Don't know why.
-        input_ids = self.pad_sequence(input_ids, batch_first=True, padding_value=self.tokenizer.pad_token_id)
-        labels = self.pad_sequence(labels, batch_first=True, padding_value=IGNORE_INDEX)
-        batch = dict(input_ids=input_ids,
-                     labels=labels.long() if labels.dtype == torch.int32 else labels,
-                     attention_mask=input_ids.ne(self.tokenizer.pad_token_id))
-        # batch = dict(input_ids=input_ids, labels=labels, attention_mask=input_ids.ne(self.tokenizer.pad_token_id), ids=ids)
-        if "image" in instances[0]:
-            images = [instance["image"] for instance in instances]
-            print("1 : ",len(images))
-
-            batch["image_sizes"] = [im[1] for im_list in images for im in im_list]
-            images = [im[0] for im_list in images for im in im_list]
-            print("2 : ",len(images))
-            # if all(x is not None and x.shape == images[0].shape for x in images):
-                # Image: (N, P, C, H, W)
-                # Video: (N, F, C, H, W)
-            #     batch["images"] = torch.stack(images)
-            # else:
-            batch["images"] = images
-
-        if "prompt" in instances[0]:
-            batch["prompts"] = [instance["prompt"] for instance in instances]
+        input_ids, labels = tuple([instance[key] for instance in instances]
+                                  for key in ("input_ids", "labels"))
+        input_ids = torch.nn.utils.rnn.pad_sequence(
+            input_ids,
+            batch_first=True,
+            padding_value=self.tokenizer.pad_token_id)
+        labels = torch.nn.utils.rnn.pad_sequence(labels,
+                                                 batch_first=True,
+                                                 padding_value=IGNORE_INDEX)
+        input_ids = input_ids[:, :self.tokenizer.model_max_length]
+        labels = labels[:, :self.tokenizer.model_max_length]
+        batch = dict(
+            input_ids=input_ids,
+            labels=labels,
+            attention_mask=input_ids.ne(self.tokenizer.pad_token_id),
+        )
+        if 'image' in instances[0]:
+            images = [instance['image'] for instance in instances]
+            if all(x is not None and x[0].shape == images[0][0].shape for x in images):
+                L, R = zip(*images)
+                batch['images'] = [torch.stack(L),torch.stack(R)]
+            else:
+                batch['images'] = images
 
         return batch
-
-# @dataclass
-# class DataCollatorForSupervisedDataset(object):
-#     """Collate examples for supervised fine-tuning."""
-#
-#     tokenizer: transformers.PreTrainedTokenizer
-#
-#     def __call__(self, instances: Sequence[Dict]) -> Dict[str, torch.Tensor]:
-#         input_ids, labels = tuple([instance[key] for instance in instances]
-#                                   for key in ("input_ids", "labels"))
-#         input_ids = torch.nn.utils.rnn.pad_sequence(
-#             input_ids,
-#             batch_first=True,
-#             padding_value=self.tokenizer.pad_token_id)
-#         labels = torch.nn.utils.rnn.pad_sequence(labels,
-#                                                  batch_first=True,
-#                                                  padding_value=IGNORE_INDEX)
-#         input_ids = input_ids[:, :self.tokenizer.model_max_length]
-#         labels = labels[:, :self.tokenizer.model_max_length]
-#         batch = dict(
-#             input_ids=input_ids,
-#             labels=labels,
-#             attention_mask=input_ids.ne(self.tokenizer.pad_token_id),
-#         )
-#         if 'image' in instances[0]:
-#             images = [instance['image'] for instance in instances]
-#             if all(x is not None and x[0].shape == images[0][0].shape for x in images):
-#                 L, R = zip(*images)
-#                 batch['images'] = [torch.stack(L),torch.stack(R)]
-#             else:
-#                 batch['images'] = images
-#
-#         return batch
 
 
 def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer,
