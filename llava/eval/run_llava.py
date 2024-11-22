@@ -256,7 +256,7 @@ def eval_model(args):
             images2 = load_images(image_files2)
             image_sizes2 = [x.size for x in images2]
             images_tensor2 = process_images(
-                images,
+                images2,
                 image_processor,
                 model.config
             ).to(model.device, dtype=torch.float16)
