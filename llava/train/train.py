@@ -792,7 +792,7 @@ class LazySupervisedDataset(Dataset):
                     image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
                 else:
                     image_2 = processor.preprocess(image_2, return_tensors='pt')['pixel_values'][0]
-                # print(item, image_file,sec_image_file, sources)
+                print(item, image_file,sec_image_file, sources)
         else:
             sources = copy.deepcopy([e["conversations"] for e in sources])
         data_dict = preprocess(
