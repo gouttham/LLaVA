@@ -1,4 +1,4 @@
-deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem.py \
+deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem2.py \
     --deepspeed ./scripts/zero2.json \
     --lora_enable True \
     --lora_r 128 \
