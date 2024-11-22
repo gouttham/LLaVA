@@ -825,11 +825,11 @@ class DataCollatorForSupervisedDataset(object):
         # batch = dict(input_ids=input_ids, labels=labels, attention_mask=input_ids.ne(self.tokenizer.pad_token_id), ids=ids)
         if "image" in instances[0]:
             images = [instance["image"] for instance in instances]
-            print(len(images))
+            print("1 : ",len(images))
 
             batch["image_sizes"] = [im[1] for im_list in images for im in im_list]
             images = [im[0] for im_list in images for im in im_list]
-            print(len(images))
+            print("2 : ",len(images))
             0/0
             # if all(x is not None and x.shape == images[0].shape for x in images):
                 # Image: (N, P, C, H, W)
