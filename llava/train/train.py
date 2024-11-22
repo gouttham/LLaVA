@@ -868,8 +868,8 @@ class DataCollatorForSupervisedDataset(object):
             labels=labels,
             attention_mask=input_ids.ne(self.tokenizer.pad_token_id),
         )
-        import pdb
-        pdb.set_trace()
+        print('image' in instances[0])
+        0/0
         if 'image' in instances[0]:
             images = [instance['image'] for instance in instances]
             if all(x is not None and x[0].shape == images[0][0].shape for x in images):
