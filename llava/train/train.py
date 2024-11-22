@@ -844,6 +844,8 @@ class LazySupervisedDataset(Dataset):
 #             batch["prompts"] = [instance["prompt"] for instance in instances]
 #
 #         return batch
+
+@dataclass
 class DataCollatorForSupervisedDataset(object):
     """Collate examples for supervised fine-tuning."""
 
