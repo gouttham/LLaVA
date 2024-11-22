@@ -321,9 +321,10 @@ def preprocess_multimodal(
 ) -> Dict:
 
     is_multimodal = data_args.is_multimodal
+    print(is_multimodal)
+
     import pdb
     pdb.set_trace()
-    print(is_multimodal)
     if not is_multimodal:
         return sources
 
