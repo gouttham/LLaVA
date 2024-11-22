@@ -761,7 +761,7 @@ class LazySupervisedDataset(Dataset):
                     comment = ["when compared with the first image, the second image is jittered",
                                "when compared with the first image, the second image is blurred",
                                "when compared with the first image, the second image is colourless",
-                               "when compared with the first image, the second image is padded"]
+                               "when compared with the first image, the second image is cropped"]
 
                     no_source = copy.deepcopy([e["conversations"] for e in sources])
                     for ech in no_source:
