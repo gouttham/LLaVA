@@ -321,15 +321,15 @@ class LlavaMetaForCausalLM(ABC):
             for i in range(num_images + 1):
                 cur_new_input_embeds.append(cur_input_embeds_no_im[i])
                 cur_new_labels.append(cur_labels_noim[i])
-                print("-1",cur_new_labels)
+                # print("-1",cur_new_labels)
                 if i < num_images:
                     cur_image_features = image_features[cur_image_idx]
                     cur_image_idx += 1
-                    print("1 : ",cur_new_input_embeds.shape)
+                    # print("1 : ",cur_new_input_embeds.shape)
                     cur_new_input_embeds.append(cur_image_features)
-                    print("2 : ",cur_new_input_embeds.shape)
+                    # print("2 : ",cur_new_input_embeds.shape)
                     cur_new_labels.append(torch.full((cur_image_features.shape[0],), IGNORE_INDEX, device=cur_labels.device, dtype=cur_labels.dtype))
-                    print("-2", cur_new_labels)
+                    # print("-2", cur_new_labels)
 
             cur_new_input_embeds = [x.to(self.device) for x in cur_new_input_embeds]
 
