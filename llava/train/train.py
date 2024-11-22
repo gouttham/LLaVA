@@ -594,7 +594,7 @@ def preprocess_mpt(
         labels=targets,
     )
 
-
+contrastive = True
 def preprocess_plain(
     sources: Sequence[str],
     tokenizer: transformers.PreTrainedTokenizer,
@@ -700,7 +700,7 @@ class LazySupervisedDataset(Dataset):
         return length_list
 
     def __getitem__(self, i) -> Dict[str, torch.Tensor]:
-        contrastive = False
+
         N = len(self.list_data_dict)
         sources = self.list_data_dict[i]
         if isinstance(i, int):
@@ -822,20 +822,22 @@ class DataCollatorForSupervisedDataset(object):
             attention_mask=input_ids.ne(self.tokenizer.pad_token_id),
         )
 
-        if 'image' in instances[0]:
-            images = [instance['image'] for instance in instances]
-            if all(x is not None and x.shape == images[0].shape for x in images):
-                batch['images'] = torch.stack(images)
-            else:
-                batch['images'] = images
+        if contrastive:
+            if 'image' in instances[0]:
+                images = [instance['image'] for instance in instances]
+                if all(x is not None and x[0].shape == images[0][0].shape for x in images):
+                    L, R = zip(*images)
+                    batch['images'] = [torch.stack(L),torch.stack(R)]
+                else:
+                    batch['images'] = images
+        else:
+            if 'image' in instances[0]:
+                images = [instance['image'] for instance in instances]
+                if all(x is not None and x.shape == images[0].shape for x in images):
+                    batch['images'] = torch.stack(images)
+                else:
+                    batch['images'] = images
 
-        # if 'image' in instances[0]:
-        #     images = [instance['image'] for instance in instances]
-        #     if all(x is not None and x[0].shape == images[0][0].shape for x in images):
-        #         L, R = zip(*images)
-        #         batch['images'] = [torch.stack(L),torch.stack(R)]
-        #     else:
-        #         batch['images'] = images
 
         return batch
 
