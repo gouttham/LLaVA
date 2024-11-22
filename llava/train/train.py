@@ -820,13 +820,21 @@ class DataCollatorForSupervisedDataset(object):
             labels=labels,
             attention_mask=input_ids.ne(self.tokenizer.pad_token_id),
         )
+
         if 'image' in instances[0]:
             images = [instance['image'] for instance in instances]
-            if all(x is not None and x[0].shape == images[0][0].shape for x in images):
-                L, R = zip(*images)
-                batch['images'] = [torch.stack(L),torch.stack(R)]
+            if all(x is not None and x.shape == images[0].shape for x in images):
+                batch['images'] = torch.stack(images)
             else:
                 batch['images'] = images
+
+        # if 'image' in instances[0]:
+        #     images = [instance['image'] for instance in instances]
+        #     if all(x is not None and x[0].shape == images[0][0].shape for x in images):
+        #         L, R = zip(*images)
+        #         batch['images'] = [torch.stack(L),torch.stack(R)]
+        #     else:
+        #         batch['images'] = images
 
         return batch
 
