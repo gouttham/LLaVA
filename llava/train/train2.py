@@ -768,7 +768,7 @@ class LazySupervisedDataset(Dataset):
                     for ech in no_source:
                         for ech_ech in ech:
                             if ech_ech["from"] == "gpt":
-                                ech_ech["value"] = "{Result: No, Comments: Both the images are not similar, "+comment[cs]+"}"
+                                ech_ech["value"] = " { Result: No, Comments: Both the images are not similar, "+comment[cs]+" }"
                             elif ech_ech["from"] == "human":
                                 ech_ech["value"] = image_token_se + ech_ech["value"]
                     sources = preprocess_multimodal(no_source, self.data_args)
@@ -779,19 +779,19 @@ class LazySupervisedDataset(Dataset):
                             if ech_ech["from"] == "human":
                                 ech_ech["value"] = image_token_se + ech_ech["value"]
                             elif ech_ech["from"] == "gpt":
-                                ech_ech["value"] = "{Result: Yes, Comments: Both the images are similar}"
+                                ech_ech["value"] = " { Result: Yes, Comments: Both the images are similar }"
                     sources = preprocess_multimodal(yes_source, self.data_args)
 
             if contrastive:
                 image_2 = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
                 if trans_sel == "jitter":
-                    self.jitter(image_2)
+                    image_2 = self.jitter(image_2)
                 if trans_sel == "blur":
-                    self.blur(image_2)
+                    image_2 = self.blur(image_2)
                 if trans_sel == "grey":
-                    self.grey(image_2)
+                    image_2 = self.grey(image_2)
                 if trans_sel == "crop":
-                    self.crop(image_2)
+                    image_2 = self.crop(image_2)
 
                 if self.data_args.image_aspect_ratio == 'pad':
                     def expand2square(pil_img, background_color):
