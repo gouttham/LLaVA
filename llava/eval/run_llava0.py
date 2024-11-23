@@ -187,13 +187,13 @@ def eval_model(args):
 
             image_2 = images2[0]
             if trans_sel == "jitter":
-                jitter(image_2)
+                image_2 = jitter(image_2)
             elif trans_sel == "blur":
-                blur(image_2)
+                image_2 = blur(image_2)
             elif trans_sel == "grey":
-                grey(image_2)
+                image_2 = grey(image_2)
             elif trans_sel == "crop":
-                crop(image_2)
+                image_2 = crop(image_2)
             images2 = [image_2]
 
             image_sizes2 = [x.size for x in images2]
