@@ -234,9 +234,7 @@ def eval_model(args):
                 )
 
             outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-            print("\nResponse: ", outputs)
             cur_out.append(outputs)
-        print(cur_out)
         pd = get_max_repeated_string(cur_out)
         print(pd,gt)
         pds.append(pd)
