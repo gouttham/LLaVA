@@ -696,7 +696,7 @@ class LazySupervisedDataset(Dataset):
         self.jitter = T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.1)
         self.blur = T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
         self.grey = T.Grayscale(num_output_channels=3)
-        self.crop = T.RandomErasing(p=1, scale=(0.02, 0.33), ratio=(0.3, 3.3), value=0),
+        self.crop = T.RandomErasing(p=1, scale=(0.02, 0.33), ratio=(0.3, 3.3), value=0)
 
     def __len__(self):
         return len(self.list_data_dict)
