@@ -17,7 +17,7 @@ deepspeed /localscratch/gna23/LLaVA/llava/train/train_mem2.py \
     --image_aspect_ratio pad \
     --group_by_modality_length True \
     --bf16 True \
-    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls2 \
+    --output_dir /localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls2_4cls \
     --num_train_epochs 500 \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 16 \
