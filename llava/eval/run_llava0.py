@@ -145,10 +145,8 @@ def eval_model(args):
         print(ctr,end='\r')
         ctr+=1
         for _ in range(1):
-            print(val["image"])
 
             im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
-            im_nam2 = ["/localscratch/gna23/LLaVA/v1/cd_images/" + val["image"]]
             for ech in val["conversations"]:
                 if ech["from"] == "human":
                     qs = ech["value"]
@@ -184,17 +182,17 @@ def eval_model(args):
             ).to(model.device, dtype=torch.float16)
 
             # Load and Process Image
-            image_files2 = im_nam2  # Wrap in list for compatibility
+            image_files2 = im_nam  # Wrap in list for compatibility
             images2 = load_images(image_files2)
 
             image_2 = images2[0]
             if trans_sel == "jitter":
                 jitter(image_2)
-            if trans_sel == "blur":
+            elif trans_sel == "blur":
                 blur(image_2)
-            if trans_sel == "grey":
+            elif trans_sel == "grey":
                 grey(image_2)
-            if trans_sel == "crop":
+            elif trans_sel == "crop":
                 crop(image_2)
             images2 = [image_2]
 
@@ -235,7 +233,7 @@ def eval_model(args):
 
             outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
             cur_out.append(outputs)
-        pd = get_max_repeated_string(cur_out)
+        pd = outputs[0]
         print(pd,gt)
         pds.append(pd)
         gts.append(gt)
