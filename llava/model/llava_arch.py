@@ -225,7 +225,9 @@ class LlavaMetaForCausalLM(ABC):
                     filtered_list = [x for x in ech if x != -100]
                     print(filtered_list)
                     oo = tokenizer.decode(filtered_list)
-                    ll.append(str(oo))
+                    oo = oo.split(' ')
+                    print(oo)
+                    ll.append(oo[0])
 
                 tensor1 = images[0]
                 tensor2 = images[1]
