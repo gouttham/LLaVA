@@ -135,11 +135,11 @@ def eval_model(args):
 
             for ech in val["conversations"]:
                 if ech["from"] == "gpt":
-                    ech["value"] = "{Result: No, Comments: Both the images are not similar, "+comment[cs]+"}"
+                    ech["value"] = "No, Comments: "+comment[cs]
         else:
             for ech in val["conversations"]:
                 if ech["from"] == "gpt":
-                    ech["value"] = "{Result: Yes, Comments: Both the images are similar}"
+                    ech["value"] = "Yes, Comments: Both the images are similar"
 
         cur_out = []
         print(ctr,end='\r')
