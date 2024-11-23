@@ -75,12 +75,12 @@ def get_max_repeated_string(string_list):
 def eval_model(args):
     # Model Initialization
 
-    jitter = T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.1)
     blur = T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
     grey = T.Grayscale(num_output_channels=3)
     crop = T.Compose([T.ToTensor(),
                     T.RandomErasing(p=1.0, scale=(0.02, 0.33), ratio=(0.3, 3.3), value=0),
                     T.ToPILImage() ])
+    flip = T.RandomVerticalFlip(p=1.0)
 
     disable_torch_init()
 
@@ -126,12 +126,14 @@ def eval_model(args):
 
         item = random.choice([0, 1, 2, 3])
 
-        cs = random.choice([0, 1])
-        trans_sel = ["blur", "crop"][cs]
+        cs = random.choice([0, 1,2,3])
+        trans_sel = ["blur", "crop", "flip", "grey"][cs]
 
         if item == 0 or item == 3:
             comment = ["when compared with the first image, the second image is blurred",
-                       "when compared with the first image, the second image is cropped"]
+                       "when compared with the first image, the second image is cropped",
+                       "when compared with the first image, the second image is flipped",
+                       "when compared with the first image, the second image is decolorized"]
 
             for ech in val["conversations"]:
                 if ech["from"] == "gpt":
@@ -190,6 +192,10 @@ def eval_model(args):
                 image_2 = blur(image_2)
             if trans_sel == "crop":
                 image_2 = crop(image_2)
+            if trans_sel == "flip":
+                image_2 = flip(image_2)
+            if trans_sel == "grey":
+                image_2 = grey(image_2)
             images2 = [image_2]
 
             image_sizes2 = [x.size for x in images2]
