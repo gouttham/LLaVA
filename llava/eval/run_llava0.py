@@ -230,7 +230,10 @@ def eval_model(args):
             outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
             cur_out.append(outputs)
         pd = cur_out[0]
-        print(pd,gt)
+
+        pd = pd.split(" ")[-1]
+        gt = gt.split(" ")[-1]
+        print(pd, gt)
         pds.append(pd)
         gts.append(gt)
 
