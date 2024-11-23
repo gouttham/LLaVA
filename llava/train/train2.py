@@ -755,13 +755,11 @@ class LazySupervisedDataset(Dataset):
                 image_token_se = DEFAULT_IMAGE_TOKEN + "\n"
                 item = random.choice([0, 1, 2,3])
 
-                cs = random.choice([0, 1, 2, 3])
-                trans_sel = ["jitter", "blur", "grey", "crop"][cs]
+                cs = random.choice([0, 1])
+                trans_sel = ["blur", "crop"][cs]
 
                 if item == 0 or item == 3:
-                    comment = ["when compared with the first image, the second image is jittered",
-                               "when compared with the first image, the second image is blurred",
-                               "when compared with the first image, the second image is colourless",
+                    comment = ["when compared with the first image, the second image is blurred",
                                "when compared with the first image, the second image is cropped"]
 
                     no_source = copy.deepcopy([e["conversations"] for e in sources])
@@ -784,12 +782,8 @@ class LazySupervisedDataset(Dataset):
 
             if contrastive:
                 image_2 = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
-                if trans_sel == "jitter":
-                    image_2 = self.jitter(image_2)
                 if trans_sel == "blur":
                     image_2 = self.blur(image_2)
-                if trans_sel == "grey":
-                    image_2 = self.grey(image_2)
                 if trans_sel == "crop":
                     image_2 = self.crop(image_2)
 
