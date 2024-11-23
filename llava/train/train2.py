@@ -693,13 +693,14 @@ class LazySupervisedDataset(Dataset):
         self.list_data_dict = list_data_dict
         self.data_args = data_args
 
-        self.jitter = T.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.1)
+
         self.blur = T.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5))
         self.grey = T.Grayscale(num_output_channels=3)
         self.crop = T.Compose([
                             T.ToTensor(),
                             T.RandomErasing(p=1.0, scale=(0.02, 0.33), ratio=(0.3, 3.3), value=0),
                             T.ToPILImage() ])
+        self.flip = T.RandomVerticalFlip(p=1.0)
 
     def __len__(self):
         return len(self.list_data_dict)
@@ -758,12 +759,14 @@ class LazySupervisedDataset(Dataset):
                 image_token_se = DEFAULT_IMAGE_TOKEN + "\n"
                 item = random.choice([0, 1, 2,3])
 
-                cs = random.choice([0, 1])
-                trans_sel = ["blur", "crop"][cs]
+                cs = random.choice([0, 1, 2, 3])
+                trans_sel = ["blur", "crop", "flip", "grey"][cs]
 
                 if item == 0 or item == 3:
                     comment = ["when compared with the first image, the second image is blurred",
-                               "when compared with the first image, the second image is cropped"]
+                               "when compared with the first image, the second image is cropped",
+                               "when compared with the first image, the second image is flipped",
+                               "when compared with the first image, the second image is decolorized"]
 
                     no_source = copy.deepcopy([e["conversations"] for e in sources])
                     for ech in no_source:
@@ -789,6 +792,11 @@ class LazySupervisedDataset(Dataset):
                     image_2 = self.blur(image_2)
                 if trans_sel == "crop":
                     image_2 = self.crop(image_2)
+                if trans_sel == "flip":
+                    image_2 = self.flip(image_2)
+                if trans_sel == "grey":
+                    image_2 = self.grey(image_2)
+
 
                 if self.data_args.image_aspect_ratio == 'pad':
                     def expand2square(pil_img, background_color):
