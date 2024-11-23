@@ -223,7 +223,6 @@ class LlavaMetaForCausalLM(ABC):
                 ll = []
                 for ech in labels:
                     filtered_list = [x for x in ech if x != -100]
-                    print(filtered_list)
                     oo = tokenizer.decode(filtered_list)
                     oo = oo.split(' ')
                     ll.append(oo[3]+"_"+oo[-3])
