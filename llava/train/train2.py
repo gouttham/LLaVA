@@ -769,7 +769,7 @@ class LazySupervisedDataset(Dataset):
                     for ech in no_source:
                         for ech_ech in ech:
                             if ech_ech["from"] == "gpt":
-                                ech_ech["value"] = " { Result: No, Comments: Both the images are not similar, "+comment[cs]+" }"
+                                ech_ech["value"] = "No, Comments: "+comment[cs]
                             elif ech_ech["from"] == "human":
                                 ech_ech["value"] = image_token_se + ech_ech["value"]
                     sources = preprocess_multimodal(no_source, self.data_args)
@@ -780,7 +780,7 @@ class LazySupervisedDataset(Dataset):
                             if ech_ech["from"] == "human":
                                 ech_ech["value"] = image_token_se + ech_ech["value"]
                             elif ech_ech["from"] == "gpt":
-                                ech_ech["value"] = " { Result: Yes, Comments: Both the images are similar }"
+                                ech_ech["value"] = "Yes, Comments: Both the images are similar"
                     sources = preprocess_multimodal(yes_source, self.data_args)
 
             if contrastive:
