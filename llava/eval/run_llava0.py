@@ -240,8 +240,8 @@ def eval_model(args):
         pd = pd.split(" ")[-1]
         gt = gt.split(" ")[-1]
         print(pd, gt)
-        pds.append(pd)
-        gts.append(gt)
+        pds.append(pd.lower())
+        gts.append(gt.lower())
 
     # Calculating metrics
     classes = list(set(gts))
