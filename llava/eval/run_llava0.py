@@ -148,7 +148,7 @@ def eval_model(args):
         ctr+=1
         for _ in range(1):
 
-            im_nam = ["/localscratch/gna23/LLaVA/v1/cd_images/"+val["image"]]
+            im_nam = ["/localscratch/gna23/LLaVA/v2/cd_images/"+val["image"]]
             for ech in val["conversations"]:
                 if ech["from"] == "human":
                     qs = ech["value"]
