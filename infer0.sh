@@ -15,7 +15,7 @@
 #    --query "Are given two images are similar ?"
 
 python ./llava/eval/run_llava0.py \
-    --model-path "/localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls2_4cls_copy" \
+    --model-path "/localscratch/gna23/LLaVA/downloads/checkpoints/llava_lora_fn_cls2_4cls_copy_test" \
     --model-base "liuhaotian/llava-v1.5-7b" \
     --image-file "/localscratch/gna23/LLaVA/v2/cd_images/7fada345-8e1e-4956-a1bb-79735da8928f_no.jpg" \
     --query "Are given two images are similar ?"
